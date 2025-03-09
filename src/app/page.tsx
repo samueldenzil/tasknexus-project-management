@@ -22,5 +22,5 @@ export default function Home() {
       </Button>
       <Button variant={'outline'}>Outline</Button>
     </div>
-  );
+  )
 }
