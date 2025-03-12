@@ -9,16 +9,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-
-const formSchema = z.object({
-  name: z.string().trim().min(1, 'Required'),
-  email: z.string().email(),
-  password: z.string().min(8, 'Minimum 8 Characters'),
-})
+import { useRegister } from '@/features/auth/api/use-register'
+import { registerSchema } from '@/features/auth/schemas'
 
 export const SignUpCard = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const { mutate } = useRegister()
+
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
       email: '',
@@ -26,10 +24,11 @@ export const SignUpCard = () => {
     },
   })
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: z.infer<typeof registerSchema>) => {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values)
+    mutate({ json: values })
   }
 
   return (
