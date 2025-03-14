@@ -1,3 +1,5 @@
+'use client'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -13,7 +15,7 @@ import { useLogin } from '@/features/auth/api/use-login'
 import { loginSchema } from '@/features/auth/schemas'
 
 export const SignInCard = () => {
-  const { mutate } = useLogin()
+  const { mutate, isPending } = useLogin()
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -24,9 +26,6 @@ export const SignInCard = () => {
   })
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
     mutate({ json: values })
   }
 
@@ -47,7 +46,12 @@ export const SignInCard = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input type="email" placeholder="Enter email address" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="Enter email address"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -59,13 +63,18 @@ export const SignInCard = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input type="password" placeholder="Enter password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Enter password"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button size={'lg'} disabled={false} className="w-full">
+            <Button size={'lg'} disabled={isPending} className="w-full">
               Login
             </Button>
           </form>
@@ -78,7 +87,7 @@ export const SignInCard = () => {
         <Button
           variant={'secondary'}
           size={'lg'}
-          disabled={false}
+          disabled={isPending}
           className="w-full [&_svg]:size-5"
         >
           <FaGithub className="mr-2" />

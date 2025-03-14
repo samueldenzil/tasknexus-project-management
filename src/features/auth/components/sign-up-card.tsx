@@ -1,3 +1,5 @@
+'use client'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -13,7 +15,7 @@ import { useRegister } from '@/features/auth/api/use-register'
 import { registerSchema } from '@/features/auth/schemas'
 
 export const SignUpCard = () => {
-  const { mutate } = useRegister()
+  const { mutate, isPending } = useRegister()
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -25,9 +27,6 @@ export const SignUpCard = () => {
   })
 
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
     mutate({ json: values })
   }
 
@@ -58,7 +57,12 @@ export const SignUpCard = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input type="text" placeholder="Enter your name" {...field} />
+                    <Input
+                      type="text"
+                      placeholder="Enter your name"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -70,7 +74,12 @@ export const SignUpCard = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input type="email" placeholder="Enter email address" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="Enter email address"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -82,14 +91,19 @@ export const SignUpCard = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input type="password" placeholder="Enter password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Enter password"
+                      disabled={isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button size={'lg'} disabled={false} className="w-full">
-              Login
+            <Button size={'lg'} disabled={isPending} className="w-full">
+              Register
             </Button>
           </form>
         </Form>
@@ -101,7 +115,7 @@ export const SignUpCard = () => {
         <Button
           variant={'secondary'}
           size={'lg'}
-          disabled={false}
+          disabled={isPending}
           className="w-full [&_svg]:size-5"
         >
           <FaGithub className="mr-2" />
