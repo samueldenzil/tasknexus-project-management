@@ -1,26 +1,28 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
 import { Button } from '@/components/ui/button'
+import { useCurrent } from '@/features/auth/api/use-current'
+import { useLogout } from '@/features/auth/api/use-logout'
 
 export default function Home() {
+  const router = useRouter()
+  const { data, isLoading } = useCurrent()
+  const { mutate } = useLogout()
+
+  useEffect(() => {
+    if (!data && isLoading) {
+      router.push('/sign-in')
+    }
+  }, [data, isLoading, router])
+
   return (
     <div className="flex gap-2">
-      <button className=""></button>
-      <Button>Primary</Button>
-      <Button variant={'secondary'} className="">
-        Secondary
-      </Button>
-      <Button className="" variant={'destructive'}>
-        Destructive
-      </Button>
-      <Button variant={'ghost'} className="">
-        Ghost
-      </Button>
-      <Button
-        variant={'tertiary'}
-        className="border-transparent bg-blue-100 text-blue-600 shadow-none hover:bg-blue-200"
-      >
-        Link
-      </Button>
-      <Button variant={'outline'}>Outline</Button>
+      only vissible to authorized users
+      <Button onClick={() => mutate()}>Logout</Button>
+      <pre>{JSON.stringify(data, undefined, 2)}</pre>
     </div>
   )
 }
