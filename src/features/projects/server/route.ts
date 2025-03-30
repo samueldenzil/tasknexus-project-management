@@ -26,7 +26,7 @@ const app = new Hono()
         return c.json({ error: 'Unauthorized' }, 401)
       }
 
-      const projects = await databases.listDocuments(DATABASE_ID, PROJECTS_ID, [
+      const projects = await databases.listDocuments<Project>(DATABASE_ID, PROJECTS_ID, [
         Query.equal('workspaceId', workspaceId),
         Query.orderDesc('$createdAt'),
       ])
@@ -57,7 +57,7 @@ const app = new Hono()
       uploadedImageUrl = `data:image/png;base64,${Buffer.from(arrayBuffer).toString('base64')}`
     }
 
-    const project = await databases.createDocument(DATABASE_ID, PROJECTS_ID, ID.unique(), {
+    const project = await databases.createDocument<Project>(DATABASE_ID, PROJECTS_ID, ID.unique(), {
       name,
       imageUrl: uploadedImageUrl,
       workspaceId,
@@ -105,7 +105,7 @@ const app = new Hono()
       uploadedImageUrl = image
     }
 
-    const project = await databases.updateDocument(DATABASE_ID, PROJECTS_ID, projectId, {
+    const project = await databases.updateDocument<Project>(DATABASE_ID, PROJECTS_ID, projectId, {
       name,
       imageUrl: uploadedImageUrl,
     })

@@ -4,7 +4,7 @@ import { Query } from 'node-appwrite'
 import { z } from 'zod'
 
 import { DATABASE_ID, MEMBERS_ID } from '@/config'
-import { MemberRole } from '@/features/members/types'
+import { Member, MemberRole } from '@/features/members/types'
 import { getMember } from '@/features/members/utils'
 import { createAdminClient } from '@/lib/appwrite'
 import { sessionMiddleware } from '@/lib/session-middleware'
@@ -27,7 +27,7 @@ const app = new Hono()
         return c.json({ error: 'Unauthorized' }, 401)
       }
 
-      const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+      const members = await databases.listDocuments<Member>(DATABASE_ID, MEMBERS_ID, [
         Query.equal('workspaceId', workspaceId),
       ])
 
@@ -56,9 +56,9 @@ const app = new Hono()
     const user = c.get('user')
     const databases = c.get('databases')
 
-    const memberToDelete = await databases.getDocument(DATABASE_ID, MEMBERS_ID, memberId)
+    const memberToDelete = await databases.getDocument<Member>(DATABASE_ID, MEMBERS_ID, memberId)
 
-    const allMembersInWorkspace = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+    const allMembersInWorkspace = await databases.listDocuments<Member>(DATABASE_ID, MEMBERS_ID, [
       Query.equal('workspaceId', memberToDelete.workspaceId),
     ])
 
@@ -94,9 +94,9 @@ const app = new Hono()
       const user = c.get('user')
       const databases = c.get('databases')
 
-      const memberToUpdate = await databases.getDocument(DATABASE_ID, MEMBERS_ID, memberId)
+      const memberToUpdate = await databases.getDocument<Member>(DATABASE_ID, MEMBERS_ID, memberId)
 
-      const allMembersInWorkspace = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+      const allMembersInWorkspace = await databases.listDocuments<Member>(DATABASE_ID, MEMBERS_ID, [
         Query.equal('workspaceId', memberToUpdate.workspaceId),
       ])
 
@@ -118,7 +118,7 @@ const app = new Hono()
         return c.json({ error: 'Cannot downgrade the only member' }, 400)
       }
 
-      await databases.updateDocument(DATABASE_ID, MEMBERS_ID, memberToUpdate.$id, {
+      await databases.updateDocument<Member>(DATABASE_ID, MEMBERS_ID, memberToUpdate.$id, {
         role,
       })
 

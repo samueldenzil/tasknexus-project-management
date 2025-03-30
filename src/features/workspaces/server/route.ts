@@ -4,7 +4,7 @@ import { ID, Query } from 'node-appwrite'
 import { z } from 'zod'
 
 import { DATABASE_ID, IMAGES_BUCKET_ID, MEMBERS_ID, WORKSPACES_ID } from '@/config'
-import { MemberRole } from '@/features/members/types'
+import { Member, MemberRole } from '@/features/members/types'
 import { getMember } from '@/features/members/utils'
 import { createWorkspaceSchema, updateWorkspaceSchema } from '@/features/workspaces/schemas'
 import { Workspace } from '@/features/workspaces/types'
@@ -16,7 +16,7 @@ const app = new Hono()
     const user = c.get('user')
     const databases = c.get('databases')
 
-    const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+    const members = await databases.listDocuments<Member>(DATABASE_ID, MEMBERS_ID, [
       Query.equal('userId', user.$id),
     ])
 
@@ -26,7 +26,7 @@ const app = new Hono()
 
     const workspaceIds = members.documents.map((member) => member.workspaceId)
 
-    const workspaces = await databases.listDocuments(DATABASE_ID, WORKSPACES_ID, [
+    const workspaces = await databases.listDocuments<Workspace>(DATABASE_ID, WORKSPACES_ID, [
       Query.orderDesc('$createdAt'),
       Query.contains('$id', workspaceIds),
     ])
@@ -50,14 +50,19 @@ const app = new Hono()
       uploadedImageUrl = `data:image/png;base64,${Buffer.from(arrayBuffer).toString('base64')}`
     }
 
-    const workspace = await databases.createDocument(DATABASE_ID, WORKSPACES_ID, ID.unique(), {
-      name,
-      userId: user.$id,
-      imageUrl: uploadedImageUrl,
-      inviteCode: generateInviteCode(6),
-    })
+    const workspace = await databases.createDocument<Workspace>(
+      DATABASE_ID,
+      WORKSPACES_ID,
+      ID.unique(),
+      {
+        name,
+        userId: user.$id,
+        imageUrl: uploadedImageUrl,
+        inviteCode: generateInviteCode(6),
+      }
+    )
 
-    await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+    await databases.createDocument<Member>(DATABASE_ID, MEMBERS_ID, ID.unique(), {
       userId: user.$id,
       workspaceId: workspace.$id,
       role: MemberRole.ADMIN,
@@ -95,10 +100,15 @@ const app = new Hono()
         uploadedImageUrl = image
       }
 
-      const workspace = await databases.updateDocument(DATABASE_ID, WORKSPACES_ID, workspaceId, {
-        name,
-        imageUrl: uploadedImageUrl,
-      })
+      const workspace = await databases.updateDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACES_ID,
+        workspaceId,
+        {
+          name,
+          imageUrl: uploadedImageUrl,
+        }
+      )
 
       return c.json({ data: workspace })
     }
@@ -133,9 +143,14 @@ const app = new Hono()
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const workspace = await databases.updateDocument(DATABASE_ID, WORKSPACES_ID, workspaceId, {
-      inviteCode: generateInviteCode(6),
-    })
+    const workspace = await databases.updateDocument<Workspace>(
+      DATABASE_ID,
+      WORKSPACES_ID,
+      workspaceId,
+      {
+        inviteCode: generateInviteCode(6),
+      }
+    )
 
     return c.json({ data: workspace })
   })
@@ -166,7 +181,7 @@ const app = new Hono()
         return c.json({ error: 'Invalid invite code' }, 400)
       }
 
-      await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+      await databases.createDocument<Member>(DATABASE_ID, MEMBERS_ID, ID.unique(), {
         workspaceId,
         userId: user.$id,
         role: MemberRole.MEMBER,

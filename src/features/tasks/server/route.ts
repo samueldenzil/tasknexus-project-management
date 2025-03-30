@@ -4,10 +4,11 @@ import { ID, Query } from 'node-appwrite'
 import { z } from 'zod'
 
 import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID } from '@/config'
+import { Member } from '@/features/members/types'
 import { getMember } from '@/features/members/utils'
 import { Project } from '@/features/projects/types'
 import { createTaskSchema } from '@/features/tasks/schemas'
-import { TaskStatus } from '@/features/tasks/types'
+import { Task, TaskStatus } from '@/features/tasks/types'
 import { createAdminClient } from '@/lib/appwrite'
 import { sessionMiddleware } from '@/lib/session-middleware'
 
@@ -66,7 +67,7 @@ const app = new Hono()
         queries.push(Query.search('name', search))
       }
 
-      const tasks = await databases.listDocuments(DATABASE_ID, TASKS_ID, queries)
+      const tasks = await databases.listDocuments<Task>(DATABASE_ID, TASKS_ID, queries)
 
       const projectIds = tasks.documents.map((task) => task.projectId)
       const assigneeIds = tasks.documents.map((task) => task.assigneeId)
@@ -77,7 +78,7 @@ const app = new Hono()
         projectIds.length > 0 ? [Query.contains('$id', projectIds)] : []
       )
 
-      const members = await databases.listDocuments(
+      const members = await databases.listDocuments<Member>(
         DATABASE_ID,
         MEMBERS_ID,
         assigneeIds.length > 0 ? [Query.contains('$id', assigneeIds)] : []
@@ -122,7 +123,7 @@ const app = new Hono()
       return c.json({ error: 'Unauthorized' }, 401)
     }
 
-    const highestPositionTask = await databases.listDocuments(DATABASE_ID, TASKS_ID, [
+    const highestPositionTask = await databases.listDocuments<Task>(DATABASE_ID, TASKS_ID, [
       Query.equal('status', status),
       Query.equal('workspaceId', workspaceId),
       Query.orderAsc('position'),
@@ -134,7 +135,7 @@ const app = new Hono()
         ? highestPositionTask.documents[0].position + 1000
         : 1000
 
-    const task = await databases.createDocument(DATABASE_ID, TASKS_ID, ID.unique(), {
+    const task = await databases.createDocument<Task>(DATABASE_ID, TASKS_ID, ID.unique(), {
       name,
       status,
       workspaceId,

@@ -1,6 +1,7 @@
 import { Query } from 'node-appwrite'
 
 import { DATABASE_ID, MEMBERS_ID, WORKSPACES_ID } from '@/config'
+import { Member } from '@/features/members/types'
 import { getMember } from '@/features/members/utils'
 import { createSessionClient } from '@/lib/appwrite'
 import { Workspace } from './types'
@@ -10,7 +11,7 @@ export const getWorkspaces = async () => {
 
   const user = await account.get()
 
-  const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+  const members = await databases.listDocuments<Member>(DATABASE_ID, MEMBERS_ID, [
     Query.equal('userId', user.$id),
   ])
 
@@ -20,7 +21,7 @@ export const getWorkspaces = async () => {
 
   const workspaceIds = members.documents.map((member) => member.workspaceId)
 
-  const workspaces = await databases.listDocuments(DATABASE_ID, WORKSPACES_ID, [
+  const workspaces = await databases.listDocuments<Workspace>(DATABASE_ID, WORKSPACES_ID, [
     Query.orderDesc('$createdAt'),
     Query.contains('$id', workspaceIds),
   ])
