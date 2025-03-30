@@ -2,12 +2,12 @@
 
 import { Loader } from 'lucide-react'
 
-const DashboardLoading = () => {
+const LoadingPage = () => {
   return (
-    <div className="flex h-full flex-col items-center justify-center">
+    <div className="flex h-screen flex-col items-center justify-center">
       <Loader className="size-6 animate-spin text-muted-foreground" />
     </div>
   )
 }
 
-export default DashboardLoading
+export default LoadingPage
