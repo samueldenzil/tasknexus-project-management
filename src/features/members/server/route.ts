@@ -43,8 +43,6 @@ const app = new Hono()
         })
       )
 
-      console.log(populatedMembers)
-
       return c.json({
         data: {
           ...members,
