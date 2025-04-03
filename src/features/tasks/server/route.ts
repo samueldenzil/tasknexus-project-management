@@ -101,13 +101,13 @@ const app = new Hono()
         const assignee = assignees.find((assignee) => assignee.$id === task.assigneeId)
 
         return {
-          ...tasks,
+          ...task,
           project,
           assignee,
         }
       })
 
-      return c.json({ data: populatedTasks })
+      return c.json({ data: { ...tasks, documents: populatedTasks } })
     }
   )
   .post('/', sessionMiddleware, zValidator('json', createTaskSchema), async (c) => {
