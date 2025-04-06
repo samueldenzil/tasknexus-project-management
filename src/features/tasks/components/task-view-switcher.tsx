@@ -2,13 +2,16 @@
 
 import { Loader, PlusIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
+import { useCallback } from 'react'
 
 import { DottedSeparator } from '@/components/dotted-separator'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useBulkUpdateTasks } from '@/features/tasks/api/use-bulk-update-tasks'
 import { useGetTasks } from '@/features/tasks/api/use-get-tasks'
 import { useCreateTaskModal } from '@/features/tasks/hooks/use-create-task-modal'
 import { useTaskFilters } from '@/features/tasks/hooks/use-task-filters'
+import { TaskStatus } from '@/features/tasks/types'
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id'
 import { columns } from './columns'
 import { DataFilters } from './data-filters'
@@ -21,6 +24,7 @@ export const TaskViewSwitcher = () => {
 
   const workspaceId = useWorkspaceId()
   const { open } = useCreateTaskModal()
+
   const { data: task, isLoading: isLoadingTask } = useGetTasks({
     workspaceId,
     projectId,
@@ -28,6 +32,14 @@ export const TaskViewSwitcher = () => {
     status,
     dueDate,
   })
+  const { mutate: bulkUpdate } = useBulkUpdateTasks()
+
+  const onKanbanChange = useCallback(
+    (tasks: { $id: string; status: TaskStatus; position: number }[]) => {
+      bulkUpdate({ json: { tasks } })
+    },
+    [bulkUpdate]
+  )
 
   return (
     <Tabs defaultValue={view} onValueChange={setView} className="w-full flex-1 rounded-lg border">
@@ -62,7 +74,7 @@ export const TaskViewSwitcher = () => {
               <DataTable columns={columns} data={task?.documents ?? []} />
             </TabsContent>
             <TabsContent value="kanban" className="mt-0">
-              <DataKanban data={task?.documents ?? []} />
+              <DataKanban data={task?.documents ?? []} onChange={onKanbanChange} />
             </TabsContent>
             <TabsContent value="calendar" className="mt-0">
               {JSON.stringify(task, undefined, 2)}
