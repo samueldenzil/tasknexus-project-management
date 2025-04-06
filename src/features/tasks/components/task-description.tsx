@@ -20,7 +20,7 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
   const handleSave = () => {
     mutate(
       { param: { taskId: task.$id }, json: { description: value } },
-      { onSuccess: () => setIsEditing((prev) => !prev) }
+      { onSuccess: () => setIsEditing(false) }
     )
   }
 

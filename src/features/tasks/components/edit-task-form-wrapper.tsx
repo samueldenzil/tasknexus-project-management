@@ -1,7 +1,7 @@
 import { Loader } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { useGetMembers } from '@/features/members/api/use-get-workspaces'
+import { useGetMembers } from '@/features/members/api/use-get-members'
 import { useGetProjects } from '@/features/projects/api/use-get-projects'
 import { useGetTask } from '@/features/tasks/api/use-get-task'
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id'

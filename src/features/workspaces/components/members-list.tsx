@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { useDeleteMember } from '@/features/members/api/use-delete-member'
-import { useGetMembers } from '@/features/members/api/use-get-workspaces'
+import { useGetMembers } from '@/features/members/api/use-get-members'
 import { useUpdateMember } from '@/features/members/api/use-update-member'
 import { MemberAvatar } from '@/features/members/components/member-avatar'
 import { MemberRole } from '@/features/members/types'

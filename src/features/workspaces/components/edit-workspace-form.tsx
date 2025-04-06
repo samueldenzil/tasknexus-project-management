@@ -98,7 +98,7 @@ export const EditWorkspaceForm = ({ initialValue, onCancel }: EditWorkspaceFormP
     updateWorkspace(
       { form: finalValue, param: { workspaceId: initialValue.$id } },
       {
-        onSuccess: () => {
+        onError: () => {
           form.reset()
         },
       }

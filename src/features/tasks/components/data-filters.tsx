@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useGetMembers } from '@/features/members/api/use-get-workspaces'
+import { useGetMembers } from '@/features/members/api/use-get-members'
 import { useGetProjects } from '@/features/projects/api/use-get-projects'
 import { useTaskFilters } from '@/features/tasks/hooks/use-task-filters'
 import { TaskStatus } from '@/features/tasks/types'
