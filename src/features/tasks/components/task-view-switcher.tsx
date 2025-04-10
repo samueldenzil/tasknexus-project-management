@@ -7,6 +7,7 @@ import { useCallback } from 'react'
 import { DottedSeparator } from '@/components/dotted-separator'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useProjectId } from '@/features/projects/hooks/use-project-id'
 import { useBulkUpdateTasks } from '@/features/tasks/api/use-bulk-update-tasks'
 import { useGetTasks } from '@/features/tasks/api/use-get-tasks'
 import { useCreateTaskModal } from '@/features/tasks/hooks/use-create-task-modal'
@@ -28,11 +29,12 @@ export const TaskViewSwitcher = ({ hideProjectFilter }: TaskViewSwitcherProps) =
   const [view, setView] = useQueryState('task-view', { defaultValue: 'table' })
 
   const workspaceId = useWorkspaceId()
+  const paramProjectId = useProjectId()
   const { open } = useCreateTaskModal()
 
   const { data: task, isLoading: isLoadingTask } = useGetTasks({
     workspaceId,
-    projectId,
+    projectId: paramProjectId ?? projectId,
     assigneeId,
     status,
     dueDate,
