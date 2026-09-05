@@ -72,4 +72,24 @@ public class WorkspaceService {
                         w.getInviteCode()
                 )).toList();
     }
+
+    public WorkspaceDto getWorkspace(UUID workspaceId, String userId) {
+        // 1. Authorization Check: Is this user a member of this workspace?
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new RuntimeException("Workspace not found or access denied");
+        }
+
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new RuntimeException("Workspace not found"));
+
+        // 3. Return the DTO
+        return new WorkspaceDto(
+                workspace.getId(),
+                workspace.getName(),
+                workspace.getImageUrl(),
+                workspace.getInviteCode()
+        );
+    }
 }
