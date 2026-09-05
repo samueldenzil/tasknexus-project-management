@@ -12,6 +12,7 @@ import com.denzil.project_management.workspace.repository.WorkspaceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -56,5 +57,19 @@ public class WorkspaceService {
                 savedWorkspace.getName(),
                 savedWorkspace.getImageUrl(),
                 savedWorkspace.getInviteCode());
+    }
+
+    public List<WorkspaceDto> getWorkspaces(String userId) {
+        // 1. Fetch the raw entities from the database using our new query
+        List<Workspace> workspaces = workspaceRepository.findWorkspacesByUserId(UUID.fromString(userId));
+
+        // 2. Map them to DTOs
+        return workspaces.stream()
+                .map(w -> new WorkspaceDto(
+                        w.getId(),
+                        w.getName(),
+                        w.getImageUrl(),
+                        w.getInviteCode()
+                )).toList();
     }
 }

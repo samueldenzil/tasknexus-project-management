@@ -7,10 +7,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/workspaces")
@@ -26,5 +25,11 @@ public class WorkspaceController {
     public ResponseEntity<WorkspaceDto> createWorkspace(@Valid @RequestBody CreateWorkspaceRequest request, @AuthenticationPrincipal String userId) {
         WorkspaceDto workspaceDto = workspaceService.createWorkspace(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(workspaceDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WorkspaceDto>> getWorkspaces(@AuthenticationPrincipal String userId) {
+        List<WorkspaceDto> workspaces = workspaceService.getWorkspaces(userId);
+        return ResponseEntity.ok(workspaces);
     }
 }
