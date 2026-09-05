@@ -3,6 +3,7 @@ package com.denzil.project_management.workspace.service;
 import com.denzil.project_management.member.entity.Member;
 import com.denzil.project_management.member.entity.MemberRole;
 import com.denzil.project_management.member.repository.MemberRepository;
+import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.user.entity.User;
 import com.denzil.project_management.user.repository.UserRepository;
 import com.denzil.project_management.workspace.dto.CreateWorkspaceRequest;
@@ -32,7 +33,7 @@ public class WorkspaceService {
     public WorkspaceDto createWorkspace(CreateWorkspaceRequest request, String userId) {
         // 1. Fetch the user who is creating the workspace
         User owner = userRepository.findById(UUID.fromString(userId))
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // 2. Create the Workspace
         Workspace workspace = new Workspace();
@@ -78,11 +79,11 @@ public class WorkspaceService {
         boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
 
         if (!isMember) {
-            throw new RuntimeException("Workspace not found or access denied");
+            throw new ResourceNotFoundException("Workspace not found or access denied");
         }
 
         Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new RuntimeException("Workspace not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
 
         // 3. Return the DTO
         return new WorkspaceDto(
