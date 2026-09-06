@@ -1,5 +1,6 @@
 package com.denzil.project_management.task.controller;
 
+import com.denzil.project_management.task.dto.BulkUpdateRequest;
 import com.denzil.project_management.task.dto.CreateTaskRequest;
 import com.denzil.project_management.task.dto.TaskDto;
 import com.denzil.project_management.task.entity.TaskStatus;
@@ -28,6 +29,12 @@ public class TaskController {
             @AuthenticationPrincipal String userId) {
         TaskDto task = taskService.createTask(request, userId);
         return ResponseEntity.ok(task);
+    }
+
+    @PostMapping("/bulk-update")
+    public ResponseEntity<Void> bulkUpdateTasks(@RequestBody BulkUpdateRequest request, @AuthenticationPrincipal String userId) {
+        taskService.bulkUpdateTasks(request, userId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping
