@@ -8,11 +8,13 @@ import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.task.dto.CreateTaskRequest;
 import com.denzil.project_management.task.dto.TaskDto;
 import com.denzil.project_management.task.entity.Task;
+import com.denzil.project_management.task.entity.TaskStatus;
 import com.denzil.project_management.task.repository.TaskRepository;
 import com.denzil.project_management.workspace.entity.Workspace;
 import com.denzil.project_management.workspace.repository.WorkspaceRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,8 +29,7 @@ public class TaskService {
             TaskRepository taskRepository,
             MemberRepository memberRepository,
             ProjectRepository projectRepository,
-            WorkspaceRepository workspaceRepository
-    ) {
+            WorkspaceRepository workspaceRepository) {
         this.taskRepository = taskRepository;
         this.memberRepository = memberRepository;
         this.projectRepository = projectRepository;
@@ -36,7 +37,8 @@ public class TaskService {
     }
 
     public TaskDto createTask(CreateTaskRequest request, String userId) {
-        Member createdBy = memberRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), request.workspaceId())
+        Member createdBy = memberRepository
+                .findByUserIdAndWorkspaceId(UUID.fromString(userId), request.workspaceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
         Workspace workspace = workspaceRepository.findById(request.workspaceId())
@@ -48,13 +50,14 @@ public class TaskService {
         Member assignee = null;
 
         if (request.assigneeId() != null) {
-            assignee = memberRepository.findByUserIdAndWorkspaceId(request.assigneeId(), request.workspaceId())
+            assignee = memberRepository
+                    .findByUserIdAndWorkspaceId(request.assigneeId(), request.workspaceId())
                     .orElseThrow(() -> new ResourceNotFoundException("Assignee not found"));
         }
 
         Task task = new Task();
         task.setName(request.name());
-        task.setStatus(request.status());
+        task.setStatus(request.status() != null ? request.status() : TaskStatus.TODO);
         task.setDueDate(request.dueDate());
         task.setWorkspace(workspace);
         task.setProject(project);
@@ -73,7 +76,32 @@ public class TaskService {
                 workspace.getId(),
                 project.getId(),
                 request.assigneeId(),
-                createdBy.getId()
-        );
+                createdBy.getId());
+    }
+
+    public List<TaskDto> getTasks(UUID workspaceId, UUID projectId, UUID assigneeId, UUID createdById,
+                                  TaskStatus status, String userId) {
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new ResourceNotFoundException("Member not found");
+        }
+
+        List<Task> tasks = taskRepository.findFilteredTasks(workspaceId, projectId, assigneeId, createdById,
+                status);
+
+        return tasks.stream()
+                .map(t -> new TaskDto(
+                        t.getId(),
+                        t.getName(),
+                        t.getStatus(),
+                        t.getDescription(),
+                        t.getDueDate(),
+                        t.getPosition(),
+                        t.getWorkspace().getId(),
+                        t.getProject().getId(),
+                        t.getAssignee() != null ? t.getAssignee().getId() : null,
+                        t.getCreatedBy().getId()))
+                .toList();
     }
 }
