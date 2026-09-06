@@ -3,6 +3,7 @@ package com.denzil.project_management.shared.config;
 import com.denzil.project_management.shared.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,6 +27,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+        http.cors(Customizer.withDefaults());
+
         // Disable CSRF (Cross-Site Request Forgery) because we will use stateless JWTs
         // later, not session cookies.
         http.csrf(AbstractHttpConfigurer::disable);
