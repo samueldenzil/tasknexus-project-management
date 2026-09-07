@@ -1,26 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { InferRequestType, InferResponseType } from 'hono'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { z } from 'zod'
 
-import { client } from '@/lib/rpc'
+import { registerSchema } from '@/features/auth/schemas'
+import { AuthResponse } from '@/features/auth/types'
+import { api } from '@/lib/api'
 
-type RequestType = InferRequestType<(typeof client.api.auth.register)['$post']>
-type ResponseType = InferResponseType<(typeof client.api.auth.register)['$post']>
+type RequestType = z.infer<typeof registerSchema>
+type ResponseType = AuthResponse
 
 export const useRegister = () => {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const mutation = useMutation<ResponseType, Error, RequestType>({
+  const mutation = useMutation<ResponseType, Error, { json: RequestType }>({
     mutationFn: async ({ json }) => {
-      const response = await client.api.auth.register.$post({ json })
-
-      if (!response.ok) {
-        throw new Error('Failed to register')
-      }
-
-      return await response.json()
+      const response = await api.post<ResponseType>('/api/v1/auth/register', json)
+      return response
     },
     onSuccess: () => {
       toast.success('Registered')

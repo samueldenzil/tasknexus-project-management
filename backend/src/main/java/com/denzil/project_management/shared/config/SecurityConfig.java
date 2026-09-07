@@ -35,7 +35,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/health").permitAll() // Anyone can check health
-                .requestMatchers("/api/v1/auth/**").permitAll() // Anyone can login/register
+                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll() // Anyone can login/register
                 .anyRequest().authenticated()); // EVERYTHING else requires auth
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

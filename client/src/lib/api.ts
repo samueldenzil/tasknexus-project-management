@@ -1,5 +1,19 @@
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL
 
+const parseResponse = async (response: Response) => {
+  const text = await response.text()
+
+  if (!text) {
+    return {}
+  }
+
+  try {
+    return JSON.parse(text)
+  } catch {
+    return { error: text }
+  }
+}
+
 const get = async <T>(endpoint: string, customConfig?: RequestInit): Promise<T> => {
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     method: 'GET',
@@ -11,30 +25,32 @@ const get = async <T>(endpoint: string, customConfig?: RequestInit): Promise<T> 
     },
   })
 
+  const data = await parseResponse(response)
+
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error ?? 'An error occured')
+    throw new Error(data.error ?? 'An error occured')
   }
 
-  return response.json()
+  return data as T
 }
 
-const post = async <T>(endpoint: string, data: unknown): Promise<T> => {
+const post = async <T>(endpoint: string, payload: unknown): Promise<T> => {
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   })
 
+  const data = await parseResponse(response)
+
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error ?? 'An error occurred')
+    throw new Error(data.error ?? 'An error occurred')
   }
 
-  return response.json()
+  return data as T
 }
 
 export const api = { get, post }

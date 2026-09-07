@@ -51,6 +51,20 @@ public class AuthController {
                 .body(authResponse);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        ResponseCookie cookie = ResponseCookie.from("jira-clone-session", "")
+                .httpOnly(true)
+                .secure(false)  // Set to true in production (HTTPS only)
+                .path("/")
+                .maxAge(0) // This immediately deletes the cookie in the browser
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
+    }
+
     @GetMapping("/me")
     public ResponseEntity<AuthResponse> getCurrentUser(@AuthenticationPrincipal String userId) {
         AuthResponse response = authService.getCurrentUser(userId);
