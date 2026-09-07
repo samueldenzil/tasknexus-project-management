@@ -8,6 +8,8 @@ import com.denzil.project_management.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class AuthService {
 
@@ -43,6 +45,13 @@ public class AuthService {
         if (!matches) {
             throw new RuntimeException("Invalid credentials");
         }
+
+        return new AuthResponse(user.getId(), user.getName(), user.getEmail());
+    }
+
+    public AuthResponse getCurrentUser(String userId) {
+        User user = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         return new AuthResponse(user.getId(), user.getName(), user.getEmail());
     }

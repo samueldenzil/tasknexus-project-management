@@ -52,7 +52,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> getCurrentUser(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok("You are authenticated! Your database ID is: " + userId);
+    public ResponseEntity<AuthResponse> getCurrentUser(@AuthenticationPrincipal String userId) {
+        AuthResponse response = authService.getCurrentUser(userId);
+        return ResponseEntity.ok(response);
     }
 }

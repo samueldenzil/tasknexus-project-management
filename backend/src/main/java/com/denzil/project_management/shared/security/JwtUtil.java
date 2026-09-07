@@ -20,8 +20,6 @@ public class JwtUtil {
     private long EXPIRATION_TIME;
 
     public String generateToken(UUID uuid) {
-        System.out.println("SECRET_KEY: " + SECRET_KEY);
-
         return Jwts.builder()
                 .subject(uuid.toString())
                 .issuedAt(new Date())
