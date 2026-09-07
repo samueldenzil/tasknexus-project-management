@@ -13,7 +13,7 @@ import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id'
 interface JoinWorkspaceFormProps {
   initialValues: {
     name: string
-  }
+  } | null
 }
 
 export const JoinWorkspaceForm = ({ initialValues }: JoinWorkspaceFormProps) => {
@@ -28,7 +28,7 @@ export const JoinWorkspaceForm = ({ initialValues }: JoinWorkspaceFormProps) => 
       { param: { workspaceId }, json: { code: inviteCode } },
       {
         onSuccess: ({ data }) => {
-          router.push(`/workspaces/${data.$id}`)
+          router.push(`/workspaces/${data.id}`)
         },
       }
     )
@@ -39,7 +39,7 @@ export const JoinWorkspaceForm = ({ initialValues }: JoinWorkspaceFormProps) => 
       <CardHeader className="p-7">
         <CardTitle className="text-xl font-bold">Join workspace</CardTitle>
         <CardDescription>
-          You&apos;ve been invited to join <strong>{initialValues.name}</strong>
+          You&apos;ve been invited to join <strong>{initialValues?.name}</strong>
         </CardDescription>
       </CardHeader>
       <div className="px-7">

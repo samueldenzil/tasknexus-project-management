@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 
 import { api } from '@/lib/api'
+import { Workspace } from './types'
 
 const getAuthHeaders = async () => {
   const cookieStore = await cookies()
@@ -13,17 +14,12 @@ export const getWorkspaces = async () => {
     const headers = await getAuthHeaders()
 
     if (!headers.Cookie) {
-      return { documents: [], total: 0 }
+      return []
     }
 
-    const data = await api.get<unknown[]>('/api/v1/workspaces', { headers })
-
-    return {
-      documents: data,
-      total: data.length,
-    }
+    return await api.get<Workspace[]>('/api/v1/workspaces', { headers })
   } catch {
-    return { documents: [], total: 0 }
+    return []
   }
 }
 
@@ -39,7 +35,7 @@ export const getWorkspaceInfo = async ({ workspaceId }: GetWorkspaceInfoProps) =
       return null
     }
 
-    const data = await api.get<any>(`/api/v1/workspaces/${workspaceId}`, { headers })
+    const data = await api.get<Workspace>(`/api/v1/workspaces/${workspaceId}`, { headers })
 
     return {
       name: data.name,

@@ -64,9 +64,20 @@ public class TaskService {
 
         Task savedTask = taskRepository.save(task);
 
-        return new TaskDto(savedTask.getId(), savedTask.getName(), savedTask.getStatus(), savedTask.getDescription(),
-                savedTask.getDueDate(), savedTask.getPosition(), workspace.getId(), project.getId(),
-                request.assigneeId(), createdBy.getId());
+        return new TaskDto(
+                savedTask.getId(),
+                savedTask.getName(),
+                savedTask.getStatus(),
+                savedTask.getDescription(),
+                savedTask.getDueDate(),
+                savedTask.getPosition(),
+                workspace.getId(),
+                new TaskDto.ProjectSummaryDto(project.getId(), project.getName(), project.getImageUrl()),
+                assignee != null ? new TaskDto.AssigneeSummaryDto(assignee.getId(), assignee.getUser().getName())
+                        : null,
+                new TaskDto.CreatedBySummaryDto(createdBy.getId(), createdBy.getUser().getName())
+
+        );
     }
 
     public List<TaskDto> getTasks(UUID workspaceId, UUID projectId, UUID assigneeId, UUID createdById,
@@ -80,9 +91,19 @@ public class TaskService {
         List<Task> tasks = taskRepository.findFilteredTasks(workspaceId, projectId, assigneeId, createdById, status);
 
         return tasks.stream()
-                .map(t -> new TaskDto(t.getId(), t.getName(), t.getStatus(), t.getDescription(), t.getDueDate(),
-                        t.getPosition(), t.getWorkspace().getId(), t.getProject().getId(),
-                        t.getAssignee() != null ? t.getAssignee().getId() : null, t.getCreatedBy().getId()))
+                .map(t -> {
+                    Project project = t.getProject();
+                    Member assignee = t.getAssignee();
+                    Member createdBy = t.getCreatedBy();
+
+                    return new TaskDto(t.getId(), t.getName(), t.getStatus(), t.getDescription(), t.getDueDate(),
+                            t.getPosition(), t.getWorkspace().getId(),
+                            new TaskDto.ProjectSummaryDto(project.getId(), project.getName(), project.getImageUrl()),
+                            assignee != null
+                                    ? new TaskDto.AssigneeSummaryDto(assignee.getId(), assignee.getUser().getName())
+                                    : null,
+                            new TaskDto.CreatedBySummaryDto(createdBy.getId(), createdBy.getUser().getName()));
+                })
                 .toList();
     }
 

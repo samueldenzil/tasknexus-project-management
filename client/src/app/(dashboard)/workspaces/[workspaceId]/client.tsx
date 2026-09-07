@@ -53,7 +53,7 @@ export const WorkspaceIdClient = () => {
       <Analytics data={workspaceAnalytics} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <TasksList data={tasks.documents} total={tasks.total} />
-        <ProjectsList data={projects.documents} total={projects.total} />
+        <ProjectsList data={projects} total={projects.length} />
         <MembersList data={members.documents} total={members.total} />
       </div>
     </div>
@@ -134,13 +134,13 @@ const ProjectsList = ({ data, total }: ProjectsListProps) => {
         <DottedSeparator className="my-4" />
         <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {data.map((project) => (
-            <li key={project.$id}>
-              <Link href={`/workspaces/${workspaceId}/projects/${project.$id}`}>
+            <li key={project.id}>
+              <Link href={`/workspaces/${workspaceId}/projects/${project.id}`}>
                 <Card className="rounded-lg shadow-none transition hover:opacity-75">
                   <CardContent className="flex items-center gap-x-2.5 p-4">
                     <ProjectAvatar
                       name={project.name}
-                      image={project.imageUrl}
+                      image={project.imageUrl ?? ''}
                       className="size-12"
                       fallbackClassName="text-lg"
                     />

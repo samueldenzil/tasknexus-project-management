@@ -33,7 +33,7 @@ import { cn } from '@/lib/utils'
 
 interface EditTaskFormProps {
   onCancel?: () => void
-  projectOptions: { id: string; name: string; imageUrl?: string }[]
+  projectOptions: { id: string; name: string; imageUrl: string | null }[]
   memberOptions: { id: string; name: string }[]
   initialValues: Task
 }
@@ -56,7 +56,7 @@ export const EditTaskForm = ({
 
   const onSubmit = (values: z.infer<typeof createTaskSchema>) => {
     mutate(
-      { json: values, param: { taskId: initialValues.$id } },
+      { json: values, param: { taskId: initialValues.id } },
       {
         onSuccess: () => {
           form.reset()
@@ -190,7 +190,7 @@ export const EditTaskForm = ({
                               <ProjectAvatar
                                 className="size-6"
                                 name={project.name}
-                                image={project.imageUrl}
+                                image={project.imageUrl ?? ''}
                               />
                               {project.name}
                             </div>

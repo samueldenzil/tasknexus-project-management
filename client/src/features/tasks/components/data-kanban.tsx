@@ -19,7 +19,7 @@ type TasksState = {
 
 interface DataKanbanProps {
   data: Task[]
-  onChange: (tasks: { $id: string; status: TaskStatus; position: number }[]) => void
+  onChange: (tasks: { id: string; status: TaskStatus; position: number }[]) => void
 }
 
 export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
@@ -73,7 +73,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
       const sourceStatus = source.droppableId as TaskStatus
       const destStatus = destination.droppableId as TaskStatus
 
-      let updatesPayload: { $id: string; status: TaskStatus; position: number }[] = []
+      let updatesPayload: { id: string; status: TaskStatus; position: number }[] = []
 
       setTasks((prevTasks) => {
         const newTasks = { ...prevTasks }
@@ -105,18 +105,18 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
 
         // Always update the moved task
         updatesPayload.push({
-          $id: updatedMovedTask.$id,
+          id: updatedMovedTask.id,
           status: destStatus,
           position: Math.min((destination.index + 1) * 1000, 1_000_000),
         })
 
         // Update positions for affected tasks in the destination column
         newTasks[destStatus].forEach((task, index) => {
-          if (task && task.$id !== updatedMovedTask.$id) {
+          if (task && task.id !== updatedMovedTask.id) {
             const newPosition = Math.min((index + 1) * 1000, 1_000_000)
             if (task.position !== newPosition) {
               updatesPayload.push({
-                $id: task.$id,
+                id: task.id,
                 status: destStatus,
                 position: newPosition,
               })
@@ -131,7 +131,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
               const newPosition = Math.min((index + 1) * 1000, 1_000_000)
               if (task.position !== newPosition) {
                 updatesPayload.push({
-                  $id: task.$id,
+                  id: task.id,
                   status: sourceStatus,
                   position: newPosition,
                 })
@@ -162,7 +162,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
                   className="min-h-[200px] py-1.5"
                 >
                   {tasks[board].map((task, index) => (
-                    <Draggable draggableId={task.$id} index={index} key={task.$id}>
+                    <Draggable draggableId={task.id} index={index} key={task.id}>
                       {(provided) => (
                         <div
                           {...provided.draggableProps}

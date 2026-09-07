@@ -42,10 +42,16 @@ export const TaskViewSwitcher = ({ hideProjectFilter }: TaskViewSwitcherProps) =
   const { mutate: bulkUpdate } = useBulkUpdateTasks()
 
   const onKanbanChange = useCallback(
-    (tasks: { $id: string; status: TaskStatus; position: number }[]) => {
-      bulkUpdate({ json: { tasks } })
+    (tasks: { id: string; status: TaskStatus; position: number }[]) => {
+      const payload = tasks.map((t) => ({
+        taskId: t.id,
+        status: t.status,
+        position: t.position,
+      }))
+
+      bulkUpdate({ json: { workspaceId, tasks: payload } })
     },
-    [bulkUpdate]
+    [bulkUpdate, workspaceId]
   )
 
   return (
@@ -78,13 +84,13 @@ export const TaskViewSwitcher = ({ hideProjectFilter }: TaskViewSwitcherProps) =
         ) : (
           <>
             <TabsContent value="table" className="mt-0">
-              <DataTable columns={columns} data={task?.documents ?? []} />
+              <DataTable columns={columns} data={task ?? []} />
             </TabsContent>
             <TabsContent value="kanban" className="mt-0">
-              <DataKanban data={task?.documents ?? []} onChange={onKanbanChange} />
+              <DataKanban data={task ?? []} onChange={onKanbanChange} />
             </TabsContent>
             <TabsContent value="calendar" className="mt-0">
-              <DataCalendar data={task?.documents ?? []} />
+              <DataCalendar data={task ?? []} />
             </TabsContent>
           </>
         )}

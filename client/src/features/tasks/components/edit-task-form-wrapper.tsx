@@ -21,8 +21,8 @@ export const EditTaskFormWrapper = ({ id, onCancel }: EditTaskFormWrapperProps) 
 
   const isLoading = isLoadingProjects || isLoadingMembers || isLoadingTask
 
-  const projectOptions = projects?.documents.map((project) => ({
-    id: project.$id,
+  const projectOptions = projects?.map((project) => ({
+    id: project.id,
     name: project.name,
     imageUrl: project.imageUrl,
   }))

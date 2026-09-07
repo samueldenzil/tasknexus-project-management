@@ -70,7 +70,7 @@ export const EditWorkspaceForm = ({ initialValue, onCancel }: EditWorkspaceFormP
     }
 
     deleteWorkspace(
-      { param: { workspaceId: initialValue.$id } },
+      { param: { workspaceId: initialValue.id } },
       {
         onSuccess: () => {
           window.location.href = '/'
@@ -86,7 +86,7 @@ export const EditWorkspaceForm = ({ initialValue, onCancel }: EditWorkspaceFormP
       return
     }
 
-    resetInviteCode({ param: { workspaceId: initialValue.$id } })
+    resetInviteCode({ param: { workspaceId: initialValue.id } })
   }
 
   const onSubmit = (values: z.infer<typeof updateWorkspaceSchema>) => {
@@ -96,7 +96,7 @@ export const EditWorkspaceForm = ({ initialValue, onCancel }: EditWorkspaceFormP
     }
 
     updateWorkspace(
-      { form: finalValue, param: { workspaceId: initialValue.$id } },
+      { form: finalValue, param: { workspaceId: initialValue.id } },
       {
         onError: () => {
           form.reset()
@@ -113,7 +113,7 @@ export const EditWorkspaceForm = ({ initialValue, onCancel }: EditWorkspaceFormP
     }
   }
 
-  const fullInviteLink = `${window.location.origin}/workspaces/${initialValue.$id}/join/${initialValue.inviteCode}`
+  const fullInviteLink = `${window.location.origin}/workspaces/${initialValue.id}/join/${initialValue.inviteCode}`
 
   const handleCopyInviteLink = () => {
     navigator.clipboard
@@ -130,7 +130,7 @@ export const EditWorkspaceForm = ({ initialValue, onCancel }: EditWorkspaceFormP
           <Button
             variant="secondary"
             size="sm"
-            onClick={onCancel ? onCancel : () => router.push(`/workspaces/${initialValue.$id}`)}
+            onClick={onCancel ? onCancel : () => router.push(`/workspaces/${initialValue.id}`)}
           >
             <ArrowLeftIcon className="mr-2 size-4" />
             Back

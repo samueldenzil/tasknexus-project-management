@@ -13,8 +13,15 @@ public record TaskDto(
         LocalDate dueDate,
         Integer position,
         UUID workspaceId,
-        UUID projectId,
-        UUID assigneeId,
-        UUID createdById
-) {
+        ProjectSummaryDto project,
+        AssigneeSummaryDto assignee,
+        CreatedBySummaryDto createdById) {
+    public record ProjectSummaryDto(UUID id, String name, String imageUrl) {
+    }
+
+    public record AssigneeSummaryDto(UUID id, String name) {
+    }
+
+    public record CreatedBySummaryDto(UUID id, String name) {
+    }
 }

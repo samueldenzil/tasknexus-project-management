@@ -62,7 +62,7 @@ export const EditProjectForm = ({ initialValue, onCancel }: EditProjectFormProps
     }
 
     deleteProject(
-      { param: { projectId: initialValue.$id } },
+      { param: { projectId: initialValue.id } },
       {
         onSuccess: () => {
           window.location.href = `/workspaces/${initialValue.workspaceId}`
@@ -78,7 +78,7 @@ export const EditProjectForm = ({ initialValue, onCancel }: EditProjectFormProps
     }
 
     updateProject(
-      { form: finalValue, param: { projectId: initialValue.$id } },
+      { form: finalValue, param: { projectId: initialValue.id } },
       { onError: () => form.reset() }
     )
   }
@@ -104,7 +104,7 @@ export const EditProjectForm = ({ initialValue, onCancel }: EditProjectFormProps
                 ? onCancel
                 : () =>
                     router.push(
-                      `/workspaces/${initialValue.workspaceId}/projects/${initialValue.$id}`
+                      `/workspaces/${initialValue.workspaceId}/projects/${initialValue.id}`
                     )
             }
           >

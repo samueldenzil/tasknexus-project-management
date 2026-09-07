@@ -121,10 +121,10 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'actions',
     cell: ({ row }) => {
-      const { projectId, $id } = row.original
+      const { projectId, id } = row.original
 
       return (
-        <TaskActions id={$id} projectId={projectId}>
+        <TaskActions id={id} projectId={projectId}>
           <Button variant={'ghost'} className="size-8 p-0">
             <MoreVertical className="size-4" />
           </Button>

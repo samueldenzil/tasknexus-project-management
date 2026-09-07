@@ -34,7 +34,7 @@ import { cn } from '@/lib/utils'
 
 interface CreateTaskFormProps {
   onCancel?: () => void
-  projectOptions: { id: string; name: string; imageUrl?: string }[]
+  projectOptions: { id: string; name: string; imageUrl: string | null }[]
   memberOptions: { id: string; name: string }[]
 }
 
@@ -193,7 +193,7 @@ export const CreateTaskForm = ({
                               <ProjectAvatar
                                 className="size-6"
                                 name={project.name}
-                                image={project.imageUrl}
+                                image={project.imageUrl ?? ''}
                               />
                               {project.name}
                             </div>

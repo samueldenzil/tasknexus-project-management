@@ -17,10 +17,10 @@ export const CreateTaskFormWrapper = ({ onCancel }: CreateTaskFormWrapperProps) 
 
   const isLoading = isLoadingProjects || isLoadingMembers
 
-  const projectOptions = projects?.documents.map((project) => ({
-    id: project.$id,
-    name: project.name,
-    imageUrl: project.imageUrl,
+  const projectOptions = projects?.map(({ id, name, imageUrl }) => ({
+    id,
+    name,
+    imageUrl,
   }))
 
   const memberOptions = members?.documents.map((member) => ({

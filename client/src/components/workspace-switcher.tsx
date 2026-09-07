@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/select'
 import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces'
 import { WorkspaceAvatar } from '@/features/workspaces/components/workspace-avatar'
-import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id'
 import { useCreateWorkspaceModal } from '@/features/workspaces/hooks/use-create-workspace-modal'
+import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id'
 
 export const WorkspaceSwitcher = () => {
   const router = useRouter()
@@ -40,10 +40,10 @@ export const WorkspaceSwitcher = () => {
           <SelectValue placeholder="No workspace selected" />
         </SelectTrigger>
         <SelectContent>
-          {workspaces?.documents.map((workspace) => (
-            <SelectItem key={workspace.$id} value={workspace.$id}>
+          {workspaces?.map((workspace) => (
+            <SelectItem key={workspace.id} value={workspace.id}>
               <div className="flex items-center justify-start gap-3 font-medium">
-                <WorkspaceAvatar name={workspace.name} image={workspace.imageUrl} />
+                <WorkspaceAvatar name={workspace.name} image={workspace.imageUrl ?? ''} />
                 <span className="truncate">{workspace.name}</span>
               </div>
             </SelectItem>

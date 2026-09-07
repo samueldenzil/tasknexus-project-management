@@ -43,17 +43,13 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
   })
 
   const onSubmit = (values: z.infer<typeof createWorkspaceSchema>) => {
-    const finalValue = {
-      ...values,
-      image: values.image instanceof File ? values.image : '',
-    }
-
     mutate(
-      { form: finalValue },
+      // TODO: add image uploads to Spring Boot later
+      { json: { name: values.name } },
       {
-        onSuccess: ({ data }) => {
+        onSuccess: (data) => {
           form.reset()
-          router.push(`/workspaces/${data.$id}`)
+          router.push(`/workspaces/${data.id}`)
         },
       }
     )

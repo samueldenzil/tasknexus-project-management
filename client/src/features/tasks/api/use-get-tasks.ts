@@ -1,14 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { TaskStatus } from '@/features/tasks/types'
-import { client } from '@/lib/rpc'
+import { Task, TaskStatus } from '@/features/tasks/types'
+import { api } from '@/lib/api'
 
 interface UseGetTasksProps {
   workspaceId: string
   projectId?: string | null
   status?: TaskStatus | null
-  search?: string | null
   assigneeId?: string | null
+  createdById?: string | null
+  search?: string | null
   dueDate?: string | null
 }
 
@@ -16,31 +17,27 @@ export const useGetTasks = ({
   workspaceId,
   projectId,
   status,
-  search,
   assigneeId,
+  createdById,
+  search,
   dueDate,
 }: UseGetTasksProps) => {
-  const query = useQuery({
+  const query = useQuery<Task[]>({
     queryKey: ['tasks', workspaceId, projectId, status, search, assigneeId, dueDate],
     queryFn: async () => {
-      const response = await client.api.tasks.$get({
-        query: {
-          workspaceId,
-          projectId: projectId ?? undefined,
-          status: status ?? undefined,
-          search: search ?? undefined,
-          assigneeId: assigneeId ?? undefined,
-          dueDate: dueDate ?? undefined,
-        },
+      const params = new URLSearchParams({
+        workspaceId,
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch tasks')
-      }
+      if (projectId) params.append('projectId', projectId)
+      if (status) params.append('status', status)
+      if (assigneeId) params.append('assigneeId', assigneeId)
+      if (createdById) params.append('createdById', createdById)
+      // TODO: Check the backend for support
+      if (search) params.append('search', search)
+      if (dueDate) params.append('dueDate', dueDate)
 
-      const { data } = await response.json()
-
-      return data
+      return await api.get<Task[]>(`/api/v1/tasks?${params.toString()}`)
     },
   })
 

@@ -14,7 +14,7 @@ export const Projects = () => {
   const pathname = usePathname()
   const workspaceId = useWorkspaceId()
   const { open } = useCreateProjectModal()
-  const { data } = useGetProjects({ workspaceId })
+  const { data: projects } = useGetProjects({ workspaceId })
 
   return (
     <div className="flex flex-col gap-y-2">
@@ -25,19 +25,19 @@ export const Projects = () => {
           className="size-5 cursor-pointer text-neutral-500 transition hover:opacity-75"
         />
       </div>
-      {data?.documents.map((project) => {
-        const href = `/workspaces/${workspaceId}/projects/${project.$id}`
+      {projects?.map((project) => {
+        const href = `/workspaces/${workspaceId}/projects/${project.id}`
         const isActive = pathname === href
 
         return (
-          <Link href={href} key={project.$id}>
+          <Link href={href} key={project.id}>
             <div
               className={cn(
                 'flex cursor-pointer items-center gap-2.5 rounded-md p-2.5 text-neutral-500 transition hover:opacity-75',
                 isActive && 'bg-white text-primary shadow-sm hover:opacity-100'
               )}
             >
-              <ProjectAvatar image={project.imageUrl} name={project.name} />
+              <ProjectAvatar image={project.imageUrl ?? ''} name={project.name} />
               <span className="truncate">{project.name}</span>
             </div>
           </Link>

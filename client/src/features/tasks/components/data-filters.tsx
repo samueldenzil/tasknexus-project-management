@@ -27,8 +27,8 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
 
   const isLoading = isLoadingProjects || isLoadingMembers
 
-  const projectOptions = projects?.documents.map((project) => ({
-    value: project.$id,
+  const projectOptions = projects?.map((project) => ({
+    value: project.id,
     label: project.name,
   }))
 
