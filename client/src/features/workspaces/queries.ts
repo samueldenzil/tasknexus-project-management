@@ -1,31 +1,30 @@
-import { Query } from 'node-appwrite'
+import { cookies } from 'next/headers'
 
-import { DATABASE_ID, MEMBERS_ID, WORKSPACES_ID } from '@/config'
-import { Member } from '@/features/members/types'
-import { createSessionClient } from '@/lib/appwrite'
-import { Workspace } from './types'
+import { api } from '@/lib/api'
+
+const getAuthHeaders = async () => {
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get('jira-clone-session')
+  return sessionCookie ? { Cookie: `jira-clone-session=${sessionCookie.value}` } : {}
+}
 
 export const getWorkspaces = async () => {
-  const { account, databases } = await createSessionClient()
+  try {
+    const headers = await getAuthHeaders()
 
-  const user = await account.get()
+    if (!headers.Cookie) {
+      return { documents: [], total: 0 }
+    }
 
-  const members = await databases.listDocuments<Member>(DATABASE_ID, MEMBERS_ID, [
-    Query.equal('userId', user.$id),
-  ])
+    const data = await api.get<unknown[]>('/api/v1/workspaces', { headers })
 
-  if (members.total === 0) {
+    return {
+      documents: data,
+      total: data.length,
+    }
+  } catch {
     return { documents: [], total: 0 }
   }
-
-  const workspaceIds = members.documents.map((member) => member.workspaceId)
-
-  const workspaces = await databases.listDocuments<Workspace>(DATABASE_ID, WORKSPACES_ID, [
-    Query.orderDesc('$createdAt'),
-    Query.contains('$id', workspaceIds),
-  ])
-
-  return workspaces
 }
 
 interface GetWorkspaceInfoProps {
@@ -33,11 +32,19 @@ interface GetWorkspaceInfoProps {
 }
 
 export const getWorkspaceInfo = async ({ workspaceId }: GetWorkspaceInfoProps) => {
-  const { databases } = await createSessionClient()
+  try {
+    const headers = await getAuthHeaders()
 
-  const workspace = await databases.getDocument<Workspace>(DATABASE_ID, WORKSPACES_ID, workspaceId)
+    if (!headers.Cookie) {
+      return null
+    }
 
-  return {
-    name: workspace.name,
+    const data = await api.get<any>(`/api/v1/workspaces/${workspaceId}`, { headers })
+
+    return {
+      name: data.name,
+    }
+  } catch {
+    return null
   }
 }

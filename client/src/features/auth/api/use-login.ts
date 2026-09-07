@@ -1,31 +1,28 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { InferRequestType, InferResponseType } from 'hono'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { z } from 'zod'
 
-import { client } from '@/lib/rpc'
+import { loginSchema } from '@/features/auth/schemas'
+import { AuthResponse } from '@/features/auth/types'
+import { api } from '@/lib/api'
 
-type RequestType = InferRequestType<(typeof client.api.auth.login)['$post']>
-type ResponseType = InferResponseType<(typeof client.api.auth.login)['$post']>
+type RequestType = z.infer<typeof loginSchema>
+type ResponseType = AuthResponse
 
 export const useLogin = () => {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const mutation = useMutation<ResponseType, Error, RequestType>({
+  const mutation = useMutation<ResponseType, Error, { json: RequestType }>({
     mutationFn: async ({ json }) => {
-      const response = await client.api.auth.login.$post({ json })
-
-      if (!response.ok) {
-        throw new Error('Failed to login')
-      }
-
-      return await response.json()
+      const response = await api.post<ResponseType>('/api/v1/auth/login', json)
+      return response
     },
     onSuccess: () => {
       toast.success('Logged in')
       router.refresh()
-      queryClient.invalidateQueries({ queryKey: ['current'] })
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
     onError: () => {
       toast.error('Failed to login')
