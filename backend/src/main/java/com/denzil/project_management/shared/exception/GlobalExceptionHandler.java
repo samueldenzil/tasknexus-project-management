@@ -19,4 +19,23 @@ public class GlobalExceptionHandler {
                 "timestamp", Instant.now())
         );
     }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                "error", ex.getMessage(),
+                "status", 403,
+                "timestamp", Instant.now()
+        ));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "error", ex.getMessage(),
+                "status", 400,
+                "timestamp", Instant.now()
+        ));
+    }
+
 }
