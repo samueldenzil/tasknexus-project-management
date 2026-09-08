@@ -4,12 +4,15 @@ import com.denzil.project_management.member.entity.Member;
 import com.denzil.project_management.member.entity.MemberRole;
 import com.denzil.project_management.member.repository.MemberRepository;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
+import com.denzil.project_management.shared.exception.UnauthorizedAccessException;
 import com.denzil.project_management.user.entity.User;
 import com.denzil.project_management.user.repository.UserRepository;
 import com.denzil.project_management.workspace.dto.CreateWorkspaceRequest;
+import com.denzil.project_management.workspace.dto.UpdateWorkspaceRequest;
 import com.denzil.project_management.workspace.dto.WorkspaceDto;
 import com.denzil.project_management.workspace.entity.Workspace;
 import com.denzil.project_management.workspace.repository.WorkspaceRepository;
+import org.hibernate.jdbc.Work;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,5 +95,39 @@ public class WorkspaceService {
                 workspace.getImageUrl(),
                 workspace.getInviteCode()
         );
+    }
+
+    public WorkspaceDto updateWorkspace(UUID workspaceId, UpdateWorkspaceRequest request, String userId) {
+        Member member = memberRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found or access denied"));
+
+        if (!member.getRole().equals(MemberRole.ADMIN)) {
+            throw new UnauthorizedAccessException("Only administrators can update workspace settings");
+        }
+
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
+
+        workspace.setName(request.name());
+
+        Workspace savedWorkspace = workspaceRepository.save(workspace);
+
+        return new WorkspaceDto(
+                savedWorkspace.getId(),
+                savedWorkspace.getName(),
+                savedWorkspace.getImageUrl(),
+                savedWorkspace.getInviteCode()
+        );
+    }
+
+    public void deleteWorkspace(UUID workspaceId, String userId) {
+        Member member = memberRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found or access denied"));
+
+        if (!member.getRole().equals(MemberRole.ADMIN)) {
+            throw new UnauthorizedAccessException("Only administrators can update workspace settings");
+        }
+
+        workspaceRepository.deleteById(workspaceId);
     }
 }
