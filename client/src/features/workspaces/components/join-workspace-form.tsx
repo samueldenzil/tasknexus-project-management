@@ -25,9 +25,9 @@ export const JoinWorkspaceForm = ({ initialValues }: JoinWorkspaceFormProps) => 
 
   const onSubmit = () => {
     mutate(
-      { param: { workspaceId }, json: { code: inviteCode } },
+      { param: { workspaceId }, json: { inviteCode } },
       {
-        onSuccess: ({ data }) => {
+        onSuccess: (data) => {
           router.push(`/workspaces/${data.id}`)
         },
       }

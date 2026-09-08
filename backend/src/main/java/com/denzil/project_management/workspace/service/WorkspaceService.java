@@ -3,6 +3,7 @@ package com.denzil.project_management.workspace.service;
 import com.denzil.project_management.member.entity.Member;
 import com.denzil.project_management.member.entity.MemberRole;
 import com.denzil.project_management.member.repository.MemberRepository;
+import com.denzil.project_management.shared.exception.BadRequestException;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.shared.exception.UnauthorizedAccessException;
 import com.denzil.project_management.user.entity.User;
@@ -129,5 +130,61 @@ public class WorkspaceService {
         }
 
         workspaceRepository.deleteById(workspaceId);
+    }
+
+    public WorkspaceDto resetInviteCode(UUID workspaceId, String userId) {
+        Member member = memberRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found or access denied"));
+
+        if (!member.getRole().equals(MemberRole.ADMIN)) {
+            throw new UnauthorizedAccessException("Only administrators can update workspace settings");
+        }
+
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
+
+        workspace.setInviteCode(UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase());
+
+        Workspace savedWorkspace = workspaceRepository.save(workspace);
+
+        return new WorkspaceDto(
+                savedWorkspace.getId(),
+                savedWorkspace.getName(),
+                savedWorkspace.getImageUrl(),
+                savedWorkspace.getInviteCode()
+        );
+    }
+
+    @Transactional
+    public WorkspaceDto joinWorkspace(UUID workspaceId, String inviteCode, String userId) {
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
+
+        User user = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (isMember) {
+            throw new BadRequestException("You are already a member of this workspace");
+        }
+
+        if (!workspace.getInviteCode().equals(inviteCode)) {
+            throw new BadRequestException("Invalid Invite code");
+        }
+
+        Member member = new Member();
+        member.setUser(user);
+        member.setWorkspace(workspace);
+        member.setRole(MemberRole.MEMBER);
+
+        memberRepository.save(member);
+
+        return new WorkspaceDto(
+                workspace.getId(),
+                workspace.getName(),
+                workspace.getImageUrl(),
+                workspace.getInviteCode()
+        );
     }
 }

@@ -3,6 +3,7 @@ package com.denzil.project_management.workspace.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.denzil.project_management.workspace.dto.JoinWorkspaceRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +28,7 @@ public class WorkspaceController {
 
     @PostMapping
     public ResponseEntity<WorkspaceDto> createWorkspace(@Valid @RequestBody CreateWorkspaceRequest request,
-            @AuthenticationPrincipal String userId) {
+                                                        @AuthenticationPrincipal String userId) {
         WorkspaceDto workspaceDto = workspaceService.createWorkspace(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(workspaceDto);
     }
@@ -40,7 +41,7 @@ public class WorkspaceController {
 
     @GetMapping("/{workspaceId}")
     public ResponseEntity<WorkspaceDto> getWorkspace(@PathVariable UUID workspaceId,
-            @AuthenticationPrincipal String userId) {
+                                                     @AuthenticationPrincipal String userId) {
         WorkspaceDto workspace = workspaceService.getWorkspace(workspaceId, userId);
         return ResponseEntity.ok(workspace);
     }
@@ -60,5 +61,20 @@ public class WorkspaceController {
             @AuthenticationPrincipal String userId) {
         workspaceService.deleteWorkspace(workspaceId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{workspaceId}/reset-invite-code")
+    public ResponseEntity<WorkspaceDto> resetInviteCode(@PathVariable UUID workspaceId, @AuthenticationPrincipal String userId) {
+        WorkspaceDto workspace = workspaceService.resetInviteCode(workspaceId, userId);
+        return ResponseEntity.ok(workspace);
+    }
+
+    @PostMapping("/{workspaceId}/join")
+    public ResponseEntity<WorkspaceDto> joinWorkspace(
+            @PathVariable UUID workspaceId,
+            @Valid @RequestBody JoinWorkspaceRequest request,
+            @AuthenticationPrincipal String userId) {
+        WorkspaceDto workspace = workspaceService.joinWorkspace(workspaceId, request.inviteCode(), userId);
+        return ResponseEntity.ok(workspace);
     }
 }
