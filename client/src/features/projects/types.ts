@@ -1,6 +1,6 @@
 export type Project = {
   id: string
   name: string
-  imageUrl: string | null
+  imageUrl?: string | null
   workspaceId: string
 }
