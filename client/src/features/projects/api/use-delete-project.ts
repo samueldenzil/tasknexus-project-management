@@ -1,24 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { InferRequestType, InferResponseType } from 'hono'
 import { toast } from 'sonner'
 
-import { client } from '@/lib/rpc'
+import { api } from '@/lib/api'
 
-type RequestType = InferRequestType<(typeof client.api.projects)[':projectId']['$delete']>
-type ResponseType = InferResponseType<(typeof client.api.projects)[':projectId']['$delete'], 200>
+type RequestType = { param: { projectId: string } }
 
 export const useDeleteProject = () => {
   const queryClient = useQueryClient()
 
-  const mutation = useMutation<ResponseType, Error, RequestType>({
+  const mutation = useMutation<void, Error, RequestType>({
     mutationFn: async ({ param }) => {
-      const response = await client.api.projects[':projectId'].$delete({ param })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete project')
-      }
-
-      return await response.json()
+      await api.delete(`/api/v1/projects/${param.projectId}`)
     },
     onSuccess: () => {
       toast.success('Project deleted')

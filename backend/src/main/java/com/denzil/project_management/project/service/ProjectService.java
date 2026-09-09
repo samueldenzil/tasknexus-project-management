@@ -1,8 +1,10 @@
 package com.denzil.project_management.project.service;
 
+import com.denzil.project_management.member.entity.Member;
 import com.denzil.project_management.member.repository.MemberRepository;
 import com.denzil.project_management.project.dto.CreateProjectRequest;
 import com.denzil.project_management.project.dto.ProjectDto;
+import com.denzil.project_management.project.dto.UpdateProjectRequest;
 import com.denzil.project_management.project.entity.Project;
 import com.denzil.project_management.project.repository.ProjectRepository;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
@@ -30,7 +32,7 @@ public class ProjectService {
         boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), request.workspaceId());
 
         if (!isMember) {
-            throw new ResourceNotFoundException("Workspace not found");
+            throw new ResourceNotFoundException("Workspace not found or access denied");
         }
 
         Workspace workspace = workspaceRepository.findById(request.workspaceId()).
@@ -54,7 +56,7 @@ public class ProjectService {
         boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
 
         if (!isMember) {
-            throw new ResourceNotFoundException("Workspace not found");
+            throw new ResourceNotFoundException("Workspace not found or access denied");
         }
 
         List<Project> projects = projectRepository.findByWorkspaceId(workspaceId);
@@ -63,4 +65,54 @@ public class ProjectService {
                 .map(p -> new ProjectDto(p.getId(), p.getName(), p.getImageUrl(), workspaceId))
                 .toList();
     }
+
+    public ProjectDto getProject(UUID projectId, String userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        UUID workspaceId = project.getWorkspace().getId();
+
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new ResourceNotFoundException("Access denied");
+        }
+
+        return new ProjectDto(project.getId(), project.getName(), project.getImageUrl(), workspaceId);
+    }
+
+    public ProjectDto updateProject(UUID projectId, UpdateProjectRequest request, String userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        UUID workspaceId = project.getWorkspace().getId();
+
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new ResourceNotFoundException("Access denied");
+        }
+
+        project.setName(request.name());
+
+        Project updatedProject = projectRepository.save(project);
+
+        return new ProjectDto(updatedProject.getId(), updatedProject.getName(), updatedProject.getImageUrl(), workspaceId);
+    }
+
+    public void deleteProject(UUID projectId, String userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        UUID workspaceId = project.getWorkspace().getId();
+
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new ResourceNotFoundException("Access denied");
+        }
+
+        projectRepository.delete(project);
+    }
+
 }
