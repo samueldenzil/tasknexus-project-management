@@ -1,32 +1,21 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { InferRequestType, InferResponseType } from 'hono'
 import { toast } from 'sonner'
 
-import { client } from '@/lib/rpc'
+import { api } from '@/lib/api'
 
-type RequestType = InferRequestType<(typeof client.api.workspaces)[':workspaceId']['$delete']>
-type ResponseType = InferResponseType<
-  (typeof client.api.workspaces)[':workspaceId']['$delete'],
-  200
->
+type RequestType = { param: { workspaceId: string } }
 
 export const useDeleteWorkspace = () => {
   const queryClient = useQueryClient()
 
-  const mutation = useMutation<ResponseType, Error, RequestType>({
+  const mutation = useMutation<void, Error, RequestType>({
     mutationFn: async ({ param }) => {
-      const response = await client.api.workspaces[':workspaceId'].$delete({ param })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete workspace')
-      }
-
-      return await response.json()
+      return await api.delete(`/api/v1/workspaces/${param.workspaceId}`)
     },
-    onSuccess: ({ data }) => {
+    onSuccess: (_, { param }) => {
       toast.success('Workspace deleted')
       queryClient.invalidateQueries({ queryKey: ['workspaces'] })
-      queryClient.invalidateQueries({ queryKey: ['workspace', data.$id] })
+      queryClient.invalidateQueries({ queryKey: ['workspace', param.workspaceId] })
     },
     onError: () => {
       toast.error('Failed to delete workspace')

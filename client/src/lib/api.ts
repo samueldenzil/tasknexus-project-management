@@ -17,7 +17,6 @@ const parseResponse = async (response: Response) => {
 const get = async <T>(endpoint: string, customConfig?: RequestInit): Promise<T> => {
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     method: 'GET',
-    // CRITICAL: Tells the browser to send the HTTP-Only cookie to Spring Boot
     credentials: 'include',
     ...customConfig,
     headers: {
@@ -28,7 +27,7 @@ const get = async <T>(endpoint: string, customConfig?: RequestInit): Promise<T> 
   const data = await parseResponse(response)
 
   if (!response.ok) {
-    throw new Error(data.error ?? 'An error occured')
+    throw new Error(data.error ?? 'An error occurred')
   }
 
   return data as T
@@ -53,4 +52,47 @@ const post = async <T>(endpoint: string, payload: unknown): Promise<T> => {
   return data as T
 }
 
-export const api = { get, post }
+const patch = async <T>(endpoint: string, payload: unknown): Promise<T> => {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  })
+
+  const data = await parseResponse(response)
+
+  if (!response.ok) {
+    throw new Error(data.error ?? 'An error occurred')
+  }
+
+  return data as T
+}
+
+const del = async <T>(endpoint: string, customConfig?: RequestInit): Promise<T> => {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    ...customConfig,
+    headers: {
+      ...customConfig?.headers,
+    },
+  })
+
+  const data = await parseResponse(response)
+
+  if (!response.ok) {
+    throw new Error(data.error ?? 'An error occurred')
+  }
+
+  return data as T
+}
+
+export const api = {
+  get,
+  post,
+  patch,
+  delete: del,
+}

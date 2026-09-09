@@ -64,7 +64,7 @@ export const MembersList = () => {
         <DottedSeparator />
       </div>
       <CardContent className="p-7">
-        {members?.documents.map((member, index) => (
+        {members?.map((member, index) => (
           <Fragment key={index}>
             <div className="flex items-center gap-x-2">
               <MemberAvatar name={member.name} className="size-10" fallbackClassName="text-lg" />
@@ -81,21 +81,21 @@ export const MembersList = () => {
                 <DropdownMenuContent side="bottom" align="end">
                   <DropdownMenuItem
                     className="font-medium"
-                    onClick={() => handleUpdateMember(member.$id, MemberRole.ADMIN)}
+                    onClick={() => handleUpdateMember(member.id, MemberRole.ADMIN)}
                     disabled={isUpdatingMember}
                   >
                     Set as Administrator
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="font-medium"
-                    onClick={() => handleUpdateMember(member.$id, MemberRole.MEMBER)}
+                    onClick={() => handleUpdateMember(member.id, MemberRole.MEMBER)}
                     disabled={isUpdatingMember}
                   >
                     Set as Member
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="font-medium text-amber-700"
-                    onClick={() => handleDeleteMember(member.$id)}
+                    onClick={() => handleDeleteMember(member.id)}
                     disabled={isDeletingMember}
                   >
                     Remove {member.name}
@@ -103,7 +103,7 @@ export const MembersList = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            {index < members.documents.length - 1 && <Separator className="my-2.5" />}
+            {index < members.length - 1 && <Separator className="my-2.5" />}
           </Fragment>
         ))}
       </CardContent>

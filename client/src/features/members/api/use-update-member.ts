@@ -1,24 +1,26 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { InferRequestType, InferResponseType } from 'hono'
 import { toast } from 'sonner'
 
-import { client } from '@/lib/rpc'
+import { api } from '@/lib/api'
+import { Member, MemberRole } from '../types'
 
-type RequestType = InferRequestType<(typeof client.api.members)[':memberId']['$patch']>
-type ResponseType = InferResponseType<(typeof client.api.members)[':memberId']['$patch'], 200>
+type RequestType = {
+  json: {
+    role: MemberRole
+  }
+  param: {
+    memberId: string
+  }
+}
+
+type ResponseType = Member
 
 export const useUpdateMember = () => {
   const queryClient = useQueryClient()
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param, json }) => {
-      const response = await client.api.members[':memberId'].$patch({ param, json })
-
-      if (!response.ok) {
-        throw new Error('Failed to update member')
-      }
-
-      return await response.json()
+      return await api.patch<Member>(`/api/v1/members/${param.memberId}`, json)
     },
     onSuccess: () => {
       toast.success('Member updated')
