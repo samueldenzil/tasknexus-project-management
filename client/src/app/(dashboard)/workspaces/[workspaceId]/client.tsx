@@ -52,9 +52,9 @@ export const WorkspaceIdClient = () => {
     <div className="flex h-full flex-col space-y-4">
       <Analytics data={workspaceAnalytics} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <TasksList data={tasks.documents} total={tasks.total} />
+        <TasksList data={tasks} total={tasks.length} />
         <ProjectsList data={projects} total={projects.length} />
-        <MembersList data={members.documents} total={members.total} />
+        <MembersList data={members} total={members.length} />
       </div>
     </div>
   )
@@ -81,8 +81,8 @@ const TasksList = ({ data, total }: TasksListProps) => {
         <DottedSeparator className="my-4" />
         <ul className="flex flex-col gap-y-4">
           {data.map((task) => (
-            <li key={task.$id}>
-              <Link href={`/workspaces/${workspaceId}/tasks/${task.$id}`}>
+            <li key={task.id}>
+              <Link href={`/workspaces/${workspaceId}/tasks/${task.id}`}>
                 <Card className="rounded-lg shadow-none transition hover:opacity-75">
                   <CardContent className="p-4">
                     <p className="truncate text-lg font-medium">{task.name}</p>
@@ -92,7 +92,7 @@ const TasksList = ({ data, total }: TasksListProps) => {
                       <div className="flex items-center text-sm text-muted-foreground">
                         <CalendarIcon className="mr-1 size-3" />
                         <span className="truncate">
-                          {formatDistanceToNow(new Date(task.dueDate))}
+                          {task.dueDate ? formatDistanceToNow(new Date(task.dueDate)) : '—'}
                         </span>
                       </div>
                     </div>
@@ -181,7 +181,7 @@ const MembersList = ({ data, total }: MembersListProps) => {
         <DottedSeparator className="my-4" />
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.map((member) => (
-            <li key={member.$id}>
+            <li key={member.id}>
               <Card className="overflow-hidden rounded-lg shadow-none">
                 <CardContent className="flex flex-col items-center gap-y-2 p-3">
                   <MemberAvatar

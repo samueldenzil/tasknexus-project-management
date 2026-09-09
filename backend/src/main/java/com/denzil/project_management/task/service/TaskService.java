@@ -5,10 +5,7 @@ import com.denzil.project_management.member.repository.MemberRepository;
 import com.denzil.project_management.project.entity.Project;
 import com.denzil.project_management.project.repository.ProjectRepository;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
-import com.denzil.project_management.task.dto.BulkUpdateRequest;
-import com.denzil.project_management.task.dto.CreateTaskRequest;
-import com.denzil.project_management.task.dto.TaskDto;
-import com.denzil.project_management.task.dto.TaskPositionDto;
+import com.denzil.project_management.task.dto.*;
 import com.denzil.project_management.task.entity.Task;
 import com.denzil.project_management.task.entity.TaskStatus;
 import com.denzil.project_management.task.repository.TaskRepository;
@@ -29,7 +26,7 @@ public class TaskService {
     private final WorkspaceRepository workspaceRepository;
 
     public TaskService(TaskRepository taskRepository, MemberRepository memberRepository,
-            ProjectRepository projectRepository, WorkspaceRepository workspaceRepository) {
+                       ProjectRepository projectRepository, WorkspaceRepository workspaceRepository) {
         this.taskRepository = taskRepository;
         this.memberRepository = memberRepository;
         this.projectRepository = projectRepository;
@@ -81,11 +78,11 @@ public class TaskService {
     }
 
     public List<TaskDto> getTasks(UUID workspaceId, UUID projectId, UUID assigneeId, UUID createdById,
-            TaskStatus status, String userId) {
+                                  TaskStatus status, String userId) {
         boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
 
         if (!isMember) {
-            throw new ResourceNotFoundException("Member not found");
+            throw new ResourceNotFoundException("Member not found or Access denied");
         }
 
         List<Task> tasks = taskRepository.findFilteredTasks(workspaceId, projectId, assigneeId, createdById, status);
@@ -105,6 +102,77 @@ public class TaskService {
                             new TaskDto.CreatedBySummaryDto(createdBy.getId(), createdBy.getUser().getName()));
                 })
                 .toList();
+    }
+
+    public TaskDto getTask(UUID taskId, String userId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+
+        UUID workspaceId = task.getWorkspace().getId();
+
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new ResourceNotFoundException("Member not found or Access denied");
+        }
+
+        Project project = task.getProject();
+        Member assignee = task.getAssignee();
+        Member createdBy = task.getCreatedBy();
+
+        return new TaskDto(
+                task.getId(),
+                task.getName(),
+                task.getStatus(),
+                task.getDescription(),
+                task.getDueDate(),
+                task.getPosition(),
+                workspaceId,
+                new TaskDto.ProjectSummaryDto(project.getId(), project.getName(), project.getImageUrl()),
+                assignee != null
+                        ? new TaskDto.AssigneeSummaryDto(assignee.getId(), assignee.getUser().getName())
+                        : null,
+                new TaskDto.CreatedBySummaryDto(createdBy.getId(), createdBy.getUser().getName()));
+    }
+
+    public TaskDto updateTask(UUID taskId, UpdateTaskRequest request, String userId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+
+        UUID workspaceId = task.getWorkspace().getId();
+
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new ResourceNotFoundException("Member not found or Access denied");
+        }
+
+        Project project = request.projectId() != null ? projectRepository.findById(request.projectId()).orElseThrow(() -> new ResourceNotFoundException("Project not found")) : null;
+        Member assignee = request.assigneeId() != null ? memberRepository.findById(request.assigneeId()).orElseThrow(() -> new ResourceNotFoundException("Assignee not found")) : null;
+
+        task.setName(request.name());
+        task.setStatus(request.status());
+        task.setProject(project);
+        task.setAssignee(assignee);
+        task.setDescription(request.description());
+        task.setDueDate(request.dueDate());
+
+        Task updatedTask = taskRepository.save(task);
+
+        return new TaskDto(
+                updatedTask.getId(),
+                updatedTask.getName(),
+                updatedTask.getStatus(),
+                updatedTask.getDescription(),
+                updatedTask.getDueDate(),
+                updatedTask.getPosition(),
+                workspaceId,
+                new TaskDto.ProjectSummaryDto(project.getId(), project.getName(), project.getImageUrl()),
+                assignee != null
+                        ? new TaskDto.AssigneeSummaryDto(assignee.getId(), assignee.getUser().getName())
+                        : null,
+                new TaskDto.CreatedBySummaryDto(updatedTask.getCreatedBy().getId(), updatedTask.getCreatedBy().getUser().getName())
+        );
     }
 
     public void bulkUpdateTasks(BulkUpdateRequest request, String userId) {
@@ -139,5 +207,20 @@ public class TaskService {
 
         // 4. Save all of them to the database in one big batch!
         taskRepository.saveAll(tasksToUpdate);
+    }
+
+    public void deleteTask(UUID taskId, String userId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+
+        UUID workspaceId = task.getWorkspace().getId();
+
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new ResourceNotFoundException("Workspace not found or access denied");
+        }
+
+        taskRepository.deleteById(taskId);
     }
 }

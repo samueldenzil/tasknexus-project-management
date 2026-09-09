@@ -3,6 +3,7 @@ package com.denzil.project_management.task.controller;
 import com.denzil.project_management.task.dto.BulkUpdateRequest;
 import com.denzil.project_management.task.dto.CreateTaskRequest;
 import com.denzil.project_management.task.dto.TaskDto;
+import com.denzil.project_management.task.dto.UpdateTaskRequest;
 import com.denzil.project_management.task.entity.TaskStatus;
 import com.denzil.project_management.task.service.TaskService;
 import jakarta.validation.Valid;
@@ -46,5 +47,24 @@ public class TaskController {
             @RequestParam(required = false) TaskStatus status,
             @AuthenticationPrincipal String userId) {
         return ResponseEntity.ok(taskService.getTasks(workspaceId, projectId, assigneeId, createdById, status, userId));
+    }
+
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskDto> getTask(@PathVariable UUID taskId, @AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(taskService.getTask(taskId, userId));
+    }
+
+    @PatchMapping("/{taskId}")
+    public ResponseEntity<TaskDto> updateTask(
+            @PathVariable UUID taskId,
+            @Valid @RequestBody UpdateTaskRequest request,
+            @AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(taskService.updateTask(taskId, request, userId));
+    }
+
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(@PathVariable UUID taskId, @AuthenticationPrincipal String userId) {
+        taskService.deleteTask(taskId, userId);
+        return ResponseEntity.noContent().build();
     }
 }
