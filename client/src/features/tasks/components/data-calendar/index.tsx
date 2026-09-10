@@ -7,8 +7,8 @@ import { Task } from '@/features/tasks/types'
 import { CustomToolbar } from './custom-toolbar'
 import { EventCard } from './event-card'
 
-import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '@/features/tasks/styles/data-calendar.css'
+import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 const locales = {
   'en-US': enUS,
@@ -21,16 +21,19 @@ interface DataCalendarProps {
 }
 
 export const DataCalendar = ({ data }: DataCalendarProps) => {
-  const [value, setValue] = useState(data.length > 0 ? new Date(data[0].dueDate) : new Date())
-
+  // Add a fallback in case dueDate is null
+  const [value, setValue] = useState(
+    data.length > 0 ? new Date(data[0].dueDate || new Date()) : new Date()
+  )
   const events = data.map((task) => ({
-    start: new Date(task.dueDate),
-    end: new Date(task.dueDate),
+    // Add fallbacks for dueDate here as well
+    start: new Date(task.dueDate || new Date()),
+    end: new Date(task.dueDate || new Date()),
     title: task.name,
     project: task.project,
     assignee: task.assignee,
     status: task.status,
-    id: task.$id,
+    id: task.id,
   }))
 
   const handleNavigate = (action: 'PREV' | 'NEXT' | 'TODAY') => {

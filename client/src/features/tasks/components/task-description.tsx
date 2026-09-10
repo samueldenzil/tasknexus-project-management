@@ -13,13 +13,13 @@ interface TaskDescriptionProps {
 
 export const TaskDescription = ({ task }: TaskDescriptionProps) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [value, setValue] = useState(task.description)
+  const [value, setValue] = useState(task.description ?? '')
 
   const { mutate, isPending } = useUpdateTask()
 
   const handleSave = () => {
     mutate(
-      { param: { taskId: task.$id }, json: { description: value } },
+      { param: { taskId: task.id }, json: { description: value } },
       { onSuccess: () => setIsEditing(false) }
     )
   }
@@ -38,7 +38,7 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
         <div className="flex flex-col gap-y-4">
           <Textarea
             placeholder="Add a description..."
-            value={value}
+            value={value ?? ''}
             rows={4}
             onChange={(e) => setValue(e.target.value)}
             disabled={isPending}

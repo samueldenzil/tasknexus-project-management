@@ -27,7 +27,21 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse authResponse = authService.register(request);
-        return ResponseEntity.ok(authResponse);
+
+        // Generate JWT token so the user is instantly logged in
+        String token = jwtUtil.generateToken(authResponse.id());
+
+        // Create the HTTP-Only cookie
+        ResponseCookie cookie = ResponseCookie.from("jira-clone-session", token)
+                .httpOnly(true)
+                .secure(false)  // Set to true in production (HTTPS only)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60) // 7 days
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(authResponse);
     }
 
     @PostMapping("/login")
