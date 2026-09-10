@@ -47,8 +47,12 @@ public class TaskService {
         Member assignee = null;
 
         if (request.assigneeId() != null) {
-            assignee = memberRepository.findByUserIdAndWorkspaceId(request.assigneeId(), request.workspaceId())
+            assignee = memberRepository.findById(request.assigneeId())
                     .orElseThrow(() -> new ResourceNotFoundException("Assignee not found"));
+
+            if (!assignee.getWorkspace().getId().equals(request.workspaceId())) {
+                throw new ResourceNotFoundException("Assignee does not belong to this workspace");
+            }
         }
 
         Task task = new Task();

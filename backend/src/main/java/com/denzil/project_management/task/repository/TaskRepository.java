@@ -22,7 +22,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             "AND (cast(:createdById as uuid) IS NULL OR t.createdBy.id = :createdById) " +
             "AND (:status IS NULL OR t.status = :status) " +
             "AND (cast(:dueDate as date) IS NULL OR t.dueDate = :dueDate) " +
-            "AND (:search IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "AND (cast(:search as text) IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', cast(:search as text), '%'))) " +
             "ORDER BY t.position ASC")
     List<Task> findFilteredTasks(
             @Param("workspaceId") UUID workspaceId,
@@ -49,8 +49,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             @Param("projectId") UUID projectId,
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate,
-            @Param("today") LocalDate today
-    );
+            @Param("today") LocalDate today);
 
     @Query("""
              SELECT
@@ -60,14 +59,13 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
                  COALESCE(SUM(CASE WHEN t.status != 'DONE' THEN 1 ELSE 0 END), 0) as incompleteCount,
                  COALESCE(SUM(CASE WHEN t.status != 'DONE' AND t.dueDate < :today THEN 1 ELSE 0 END), 0) as overdueCount
              FROM Task t
-             WHERE t.workspace.id = :workspaceId 
-               AND t.createdAt >= :startDate 
+             WHERE t.workspace.id = :workspaceId
+               AND t.createdAt >= :startDate
                AND t.createdAt < :endDate
             """)
     TaskAnalyticsProjection getWorkspaceAnalytics(
             @Param("workspaceId") UUID workspaceId,
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate,
-            @Param("today") LocalDate today
-    );
+            @Param("today") LocalDate today);
 }
