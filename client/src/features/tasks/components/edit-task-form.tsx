@@ -51,6 +51,9 @@ export const EditTaskForm = ({
     defaultValues: {
       ...initialValues,
       dueDate: initialValues.dueDate ? new Date(initialValues.dueDate) : undefined,
+      projectId: initialValues.project.id,
+      assigneeId: initialValues.assignee?.id ?? '',
+      description: initialValues.description ?? '',
     },
   })
 

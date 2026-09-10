@@ -1,32 +1,29 @@
 import { useQuery } from '@tanstack/react-query'
-import { InferResponseType } from 'hono'
 
-import { client } from '@/lib/rpc'
+import { api } from '@/lib/api'
 
-export type ProjectAnalyticsResponseType = InferResponseType<
-  (typeof client.api.projects)[':projectId']['analytics']['$get'],
-  200
->
+export type ProjectAnalyticsResponseType = {
+  taskCount: number
+  taskDifference: number
+  assignedTaskCount: number
+  assignedTaskDifference: number
+  completedTaskCount: number
+  completedTaskDifference: number
+  incompleteTaskCount: number
+  incompleteTaskDifference: number
+  overdueTaskCount: number
+  overdueTaskDifference: number
+}
 
 interface UseGetProjectAnalyticsProps {
   projectId: string
 }
 
 export const useGetProjectAnalytics = ({ projectId }: UseGetProjectAnalyticsProps) => {
-  const query = useQuery({
+  const query = useQuery<ProjectAnalyticsResponseType>({
     queryKey: ['project-analytics', projectId],
     queryFn: async ({}) => {
-      const response = await client.api.projects[':projectId']['analytics'].$get({
-        param: { projectId },
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch project analytics')
-      }
-
-      const { data } = await response.json()
-
-      return data
+      return await api.get<ProjectAnalyticsResponseType>(`/api/v1/projects/${projectId}/analytics`)
     },
   })
 

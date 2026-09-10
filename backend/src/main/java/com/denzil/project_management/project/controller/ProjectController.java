@@ -1,9 +1,9 @@
 package com.denzil.project_management.project.controller;
 
+import com.denzil.project_management.shared.dto.AnalyticsDto;
 import com.denzil.project_management.project.dto.CreateProjectRequest;
 import com.denzil.project_management.project.dto.ProjectDto;
 import com.denzil.project_management.project.dto.UpdateProjectRequest;
-import com.denzil.project_management.project.entity.Project;
 import com.denzil.project_management.project.service.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -54,5 +54,11 @@ public class ProjectController {
     public ResponseEntity<Void> deleteProject(@PathVariable UUID projectId, @AuthenticationPrincipal String userId) {
         projectService.deleteProject(projectId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{projectId}/analytics")
+    public ResponseEntity<AnalyticsDto> getProjectAnalytics(@PathVariable UUID projectId, @AuthenticationPrincipal String userId) {
+        AnalyticsDto analyticsDto = projectService.getProjectAnalytics(projectId, userId);
+        return ResponseEntity.ok(analyticsDto);
     }
 }

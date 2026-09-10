@@ -23,8 +23,8 @@ export const CreateTaskFormWrapper = ({ onCancel }: CreateTaskFormWrapperProps) 
     imageUrl,
   }))
 
-  const memberOptions = members?.documents.map((member) => ({
-    id: member.$id,
+  const memberOptions = members?.map((member) => ({
+    id: member.id,
     name: member.name,
   }))
 

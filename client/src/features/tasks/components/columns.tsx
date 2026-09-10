@@ -50,7 +50,7 @@ export const columns: ColumnDef<Task>[] = [
 
       return (
         <div className="flex items-center gap-x-2 text-sm font-medium">
-          <ProjectAvatar name={project.name} image={project.imageUrl} className="size-6" />
+          <ProjectAvatar name={project.name} image={project.imageUrl ?? ''} className="size-6" />
           <p className="line-clamp-1">{project.name}</p>
         </div>
       )
@@ -72,12 +72,14 @@ export const columns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       const { assignee } = row.original
 
-      return (
-        <div className="flex items-center gap-x-2 text-sm font-medium">
-          <MemberAvatar name={assignee.name} className="size-6" fallbackClassName="text-xs" />
-          <p className="line-clamp-1">{assignee.name}</p>
-        </div>
-      )
+      if (assignee) {
+        return (
+          <div className="flex items-center gap-x-2 text-sm font-medium">
+            <MemberAvatar name={assignee.name} className="size-6" fallbackClassName="text-xs" />
+            <p className="line-clamp-1">{assignee.name}</p>
+          </div>
+        )
+      }
     },
   },
   {
@@ -96,7 +98,9 @@ export const columns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       const { dueDate } = row.original
 
-      return <TaskDate value={dueDate} />
+      if (dueDate) {
+        return <TaskDate value={dueDate} />
+      }
     },
   },
   {

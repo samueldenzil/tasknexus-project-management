@@ -34,7 +34,7 @@ import { cn } from '@/lib/utils'
 
 interface CreateTaskFormProps {
   onCancel?: () => void
-  projectOptions: { id: string; name: string; imageUrl: string | null }[]
+  projectOptions: { id: string; name: string; imageUrl?: string | null }[]
   memberOptions: { id: string; name: string }[]
 }
 

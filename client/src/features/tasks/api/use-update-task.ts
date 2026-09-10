@@ -1,26 +1,33 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { InferRequestType, InferResponseType } from 'hono'
 import { toast } from 'sonner'
 
-import { client } from '@/lib/rpc'
+import { Task, TaskStatus } from '@/features/tasks/types'
+import { api } from '@/lib/api'
 
-type RequestType = InferRequestType<(typeof client.api.tasks)[':taskId']['$patch']>
-type ResponseType = InferResponseType<(typeof client.api.tasks)[':taskId']['$patch'], 200>
+type RequestType = {
+  json: {
+    status?: TaskStatus
+    name?: string
+    workspaceId?: string
+    projectId?: string
+    assigneeId?: string
+    dueDate?: Date
+    description?: string
+  }
+  param: {
+    taskId: string
+  }
+}
+type ResponseType = Task
 
 export const useUpdateTask = () => {
   const queryClient = useQueryClient()
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json, param }) => {
-      const response = await client.api.tasks[':taskId'].$patch({ json, param })
-
-      if (!response.ok) {
-        throw new Error('Failed to update task')
-      }
-
-      return await response.json()
+      return await api.patch<ResponseType>(`/api/v1/tasks/${param.taskId}`, json)
     },
-    onSuccess: ({ data }) => {
+    onSuccess: (data) => {
       toast.success('Task updated')
 
       queryClient.invalidateQueries({ queryKey: ['project-analytics'] })
