@@ -3,6 +3,7 @@ package com.denzil.project_management.workspace.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.denzil.project_management.shared.dto.AnalyticsDto;
 import com.denzil.project_management.workspace.dto.JoinWorkspaceRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,5 +77,11 @@ public class WorkspaceController {
             @AuthenticationPrincipal String userId) {
         WorkspaceDto workspace = workspaceService.joinWorkspace(workspaceId, request.inviteCode(), userId);
         return ResponseEntity.ok(workspace);
+    }
+
+    @GetMapping("/{workspaceId}/analytics")
+    public ResponseEntity<AnalyticsDto> getWorkspaceAnalytics(@PathVariable UUID workspaceId, @AuthenticationPrincipal String userId) {
+        AnalyticsDto analyticsDto = workspaceService.getWorkspaceAnalytics(workspaceId, userId);
+        return ResponseEntity.ok(analyticsDto);
     }
 }

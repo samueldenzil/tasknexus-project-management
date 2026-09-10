@@ -3,9 +3,12 @@ package com.denzil.project_management.workspace.service;
 import com.denzil.project_management.member.entity.Member;
 import com.denzil.project_management.member.entity.MemberRole;
 import com.denzil.project_management.member.repository.MemberRepository;
+import com.denzil.project_management.shared.dto.AnalyticsDto;
+import com.denzil.project_management.shared.dto.TaskAnalyticsProjection;
 import com.denzil.project_management.shared.exception.BadRequestException;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.shared.exception.UnauthorizedAccessException;
+import com.denzil.project_management.task.repository.TaskRepository;
 import com.denzil.project_management.user.entity.User;
 import com.denzil.project_management.user.repository.UserRepository;
 import com.denzil.project_management.workspace.dto.CreateWorkspaceRequest;
@@ -13,10 +16,13 @@ import com.denzil.project_management.workspace.dto.UpdateWorkspaceRequest;
 import com.denzil.project_management.workspace.dto.WorkspaceDto;
 import com.denzil.project_management.workspace.entity.Workspace;
 import com.denzil.project_management.workspace.repository.WorkspaceRepository;
-import org.hibernate.jdbc.Work;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,11 +32,13 @@ public class WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
-    public WorkspaceService(WorkspaceRepository workspaceRepository, MemberRepository memberRepository, UserRepository userRepository) {
+    public WorkspaceService(WorkspaceRepository workspaceRepository, MemberRepository memberRepository, UserRepository userRepository, TaskRepository taskRepository) {
         this.workspaceRepository = workspaceRepository;
         this.memberRepository = memberRepository;
         this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
     }
 
     @Transactional
@@ -186,5 +194,46 @@ public class WorkspaceService {
                 workspace.getImageUrl(),
                 workspace.getInviteCode()
         );
+    }
+
+    public AnalyticsDto getWorkspaceAnalytics(UUID workspaceId, String userId) {
+        // 1. Authorization check
+        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
+
+        if (!isMember) {
+            throw new ResourceNotFoundException("Access denied");
+        }
+
+        // 2. Date boundaries
+        Instant startOfThisMonth = YearMonth.now().atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant startOfNextMonth = YearMonth.now().plusMonths(1).atDay(1).atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+        Instant startOfLastMonth = YearMonth.now().minusMonths(1).atDay(1).atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+        LocalDate today = LocalDate.now();
+
+        // 3. Let the Database do the math!
+        TaskAnalyticsProjection thisMonth = taskRepository.getWorkspaceAnalytics(
+                workspaceId, startOfThisMonth, startOfNextMonth, today);
+
+        TaskAnalyticsProjection lastMonth = taskRepository.getWorkspaceAnalytics(
+                workspaceId, startOfLastMonth, startOfThisMonth, today);
+
+        // 4. Map to DTO
+        return new AnalyticsDto(
+                thisMonth.getTotalCount(),
+                thisMonth.getTotalCount() - lastMonth.getTotalCount(),
+
+                thisMonth.getAssignedCount(),
+                thisMonth.getAssignedCount() - lastMonth.getAssignedCount(),
+
+                thisMonth.getCompletedCount(),
+                thisMonth.getCompletedCount() - lastMonth.getCompletedCount(),
+
+                thisMonth.getIncompleteCount(),
+                thisMonth.getIncompleteCount() - lastMonth.getIncompleteCount(),
+
+                thisMonth.getOverdueCount(),
+                thisMonth.getOverdueCount() - lastMonth.getOverdueCount());
     }
 }

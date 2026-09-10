@@ -32,8 +32,8 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
     label: project.name,
   }))
 
-  const memberOptions = members?.documents.map((member) => ({
-    value: member.$id,
+  const memberOptions = members?.map((member) => ({
+    value: member.id,
     label: member.name,
   }))
 
