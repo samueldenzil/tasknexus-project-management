@@ -2,12 +2,14 @@ import { differenceInDays, format } from 'date-fns'
 
 import { cn } from '@/lib/utils'
 
-interface TaskDate {
-  value: string
+interface TaskDateProps {
+  value: string | null | undefined
   className?: string
 }
 
-export const TaskDate = ({ value, className }: TaskDate) => {
+export const TaskDate = ({ value, className }: TaskDateProps) => {
+  if (!value) return null
+
   const today = new Date()
   const endDate = new Date(value)
   const diffInDays = differenceInDays(endDate, today)

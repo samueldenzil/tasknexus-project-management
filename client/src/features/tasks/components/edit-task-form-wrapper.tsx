@@ -24,7 +24,7 @@ export const EditTaskFormWrapper = ({ id, onCancel }: EditTaskFormWrapperProps) 
   const projectOptions = projects?.map((project) => ({
     id: project.id,
     name: project.name,
-    imageUrl: project.imageUrl,
+    imageUrl: project.imageUrl ?? null,
   }))
 
   const memberOptions = members?.map((member) => ({

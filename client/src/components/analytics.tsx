@@ -3,7 +3,11 @@ import { ProjectAnalyticsResponseType } from '@/features/projects/api/use-get-pr
 import { AnalyticsCard } from './analytics-card'
 import { DottedSeparator } from './dotted-separator'
 
-export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
+type AnalyticsProps = {
+  data: ProjectAnalyticsResponseType
+}
+
+export const Analytics = ({ data }: AnalyticsProps) => {
   return (
     <ScrollArea className="w-full shrink-0 whitespace-nowrap rounded-lg border">
       <div className="flex w-full flex-row">

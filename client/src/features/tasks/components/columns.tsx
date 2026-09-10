@@ -125,7 +125,10 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'actions',
     cell: ({ row }) => {
-      const { projectId, id } = row.original
+      const {
+        id,
+        project: { id: projectId },
+      } = row.original
 
       return (
         <TaskActions id={id} projectId={projectId}>

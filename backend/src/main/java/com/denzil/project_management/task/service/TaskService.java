@@ -13,6 +13,7 @@ import com.denzil.project_management.workspace.entity.Workspace;
 import com.denzil.project_management.workspace.repository.WorkspaceRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -77,15 +78,14 @@ public class TaskService {
         );
     }
 
-    public List<TaskDto> getTasks(UUID workspaceId, UUID projectId, UUID assigneeId, UUID createdById,
-                                  TaskStatus status, String userId) {
+    public List<TaskDto> getTasks(UUID workspaceId, UUID projectId, UUID assigneeId, UUID createdById, TaskStatus status, String search, LocalDate dueDate, String userId) {
         boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId);
 
         if (!isMember) {
             throw new ResourceNotFoundException("Member not found or Access denied");
         }
 
-        List<Task> tasks = taskRepository.findFilteredTasks(workspaceId, projectId, assigneeId, createdById, status);
+        List<Task> tasks = taskRepository.findFilteredTasks(workspaceId, projectId, assigneeId, createdById, status, search, dueDate);
 
         return tasks.stream()
                 .map(t -> {

@@ -21,13 +21,17 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             "AND (cast(:assigneeId as uuid) IS NULL OR t.assignee.id = :assigneeId) " +
             "AND (cast(:createdById as uuid) IS NULL OR t.createdBy.id = :createdById) " +
             "AND (:status IS NULL OR t.status = :status) " +
+            "AND (cast(:dueDate as date) IS NULL OR t.dueDate = :dueDate) " +
+            "AND (:search IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
             "ORDER BY t.position ASC")
     List<Task> findFilteredTasks(
             @Param("workspaceId") UUID workspaceId,
             @Param("projectId") UUID projectId,
             @Param("assigneeId") UUID assigneeId,
             @Param("createdById") UUID createdById,
-            @Param("status") TaskStatus status);
+            @Param("status") TaskStatus status,
+            @Param("search") String search,
+            @Param("dueDate") LocalDate dueDate);
 
     @Query("""
              SELECT

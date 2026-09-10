@@ -2,9 +2,7 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 
 import { MemberAvatar } from '@/features/members/components/member-avatar'
-import { Member } from '@/features/members/types'
 import { ProjectAvatar } from '@/features/projects/components/project-avatar'
-import { Project } from '@/features/projects/types'
 import { TaskStatus } from '@/features/tasks/types'
 import { useWorkspaceId } from '@/features/workspaces/hooks/use-workspace-id'
 import { cn } from '@/lib/utils'
@@ -19,8 +17,8 @@ const statusColorMap: Record<TaskStatus, string> = {
 
 interface EventCardProps {
   title: string
-  project: Project
-  assignee: Member & { name: string; email: string }
+  project: { id: string; name: string; imageUrl: string | null }
+  assignee: { id: string; name: string } | null
   status: TaskStatus
   id: string
 }
@@ -31,7 +29,6 @@ export const EventCard = ({ assignee, id, project, status, title }: EventCardPro
 
   const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation()
-
     router.push(`/workspaces/${workspaceId}/tasks/${id}`)
   }
 
@@ -46,9 +43,9 @@ export const EventCard = ({ assignee, id, project, status, title }: EventCardPro
       >
         <p>{title}</p>
         <div className="flex items-center gap-x-1">
-          <MemberAvatar name={assignee.name} />
+          {assignee && <MemberAvatar name={assignee.name} />}
           <div className="size-1 rounded-full bg-neutral-300" />
-          <ProjectAvatar name={project.name} image={project.imageUrl} />
+          <ProjectAvatar name={project.name} image={project.imageUrl ?? ''} />
         </div>
       </div>
     </div>
