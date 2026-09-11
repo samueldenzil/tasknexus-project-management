@@ -14,6 +14,7 @@ public record UpdateTaskRequest(
         @NotNull
         TaskStatus status,
 
+        @NotNull
         UUID projectId,
 
         LocalDate dueDate,

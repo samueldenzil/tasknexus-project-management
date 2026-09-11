@@ -1,5 +1,6 @@
 package com.denzil.project_management.project.service;
 
+import com.denzil.project_management.member.entity.Member;
 import com.denzil.project_management.member.repository.MemberRepository;
 import com.denzil.project_management.project.dto.*;
 import com.denzil.project_management.project.entity.Project;
@@ -9,7 +10,6 @@ import com.denzil.project_management.shared.dto.TaskAnalyticsProjection;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.task.repository.TaskRepository;
 import com.denzil.project_management.workspace.entity.Workspace;
-import com.denzil.project_management.workspace.repository.WorkspaceRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -24,27 +24,21 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final MemberRepository memberRepository;
-    private final WorkspaceRepository workspaceRepository;
     private final TaskRepository taskRepository;
 
     public ProjectService(ProjectRepository projectRepository, MemberRepository memberRepository,
-            WorkspaceRepository workspaceRepository, TaskRepository taskRepository) {
+            TaskRepository taskRepository) {
         this.projectRepository = projectRepository;
         this.memberRepository = memberRepository;
-        this.workspaceRepository = workspaceRepository;
         this.taskRepository = taskRepository;
     }
 
     public ProjectDto createProject(CreateProjectRequest request, String userId) {
-        boolean isMember = memberRepository.existsByUserIdAndWorkspaceId(UUID.fromString(userId),
-                request.workspaceId());
+        Member member = memberRepository.findByUserIdAndWorkspaceId(
+                UUID.fromString(userId), request.workspaceId())
+                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found or access denied"));
 
-        if (!isMember) {
-            throw new ResourceNotFoundException("Workspace not found or access denied");
-        }
-
-        Workspace workspace = workspaceRepository.findById(request.workspaceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
+        Workspace workspace = member.getWorkspace();
 
         Project project = new Project();
         project.setName(request.name());
@@ -136,12 +130,11 @@ public class ProjectService {
         }
 
         // 2. Date boundaries
-        Instant startOfThisMonth = YearMonth.now().atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
-        Instant startOfNextMonth = YearMonth.now().plusMonths(1).atDay(1).atStartOfDay(ZoneId.systemDefault())
-                .toInstant();
-        Instant startOfLastMonth = YearMonth.now().minusMonths(1).atDay(1).atStartOfDay(ZoneId.systemDefault())
-                .toInstant();
-        LocalDate today = LocalDate.now();
+        ZoneId utc = ZoneId.of("UTC");
+        Instant startOfThisMonth = YearMonth.now(utc).atDay(1).atStartOfDay(utc).toInstant();
+        Instant startOfNextMonth = YearMonth.now(utc).plusMonths(1).atDay(1).atStartOfDay(utc).toInstant();
+        Instant startOfLastMonth = YearMonth.now(utc).minusMonths(1).atDay(1).atStartOfDay(utc).toInstant();
+        LocalDate today = LocalDate.now(utc);
 
         // 3. Let the Database do the math!
         TaskAnalyticsProjection thisMonth = taskRepository.getProjectAnalytics(

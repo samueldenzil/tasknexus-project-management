@@ -6,6 +6,7 @@ import com.denzil.project_management.auth.dto.RegisterRequest;
 import com.denzil.project_management.auth.service.AuthService;
 import com.denzil.project_management.shared.security.JwtUtil;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,9 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
+
+    @Value("${app.cookie.secure}")
+    private boolean cookieSecure;
 
     public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
@@ -34,7 +38,9 @@ public class AuthController {
         // Create the HTTP-Only cookie
         ResponseCookie cookie = ResponseCookie.from("jira-clone-session", token)
                 .httpOnly(true)
-                .secure(false)  // Set to true in production (HTTPS only)
+                .secure(cookieSecure)
+                .sameSite("Lax") // Prevents cookie from being sent on cross-site POST/PATCH/DELETE requests
+                                 // (CSRF mitigation)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7 days
                 .build();
@@ -55,7 +61,9 @@ public class AuthController {
         // 3. Create the HTTP-Only cookie
         ResponseCookie cookie = ResponseCookie.from("jira-clone-session", token)
                 .httpOnly(true)
-                .secure(false)  // Set to true in production (HTTPS only)
+                .secure(cookieSecure)
+                .sameSite("Lax") // Prevents cookie from being sent on cross-site POST/PATCH/DELETE requests
+                                 // (CSRF mitigation)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7 days
                 .build();
@@ -69,7 +77,8 @@ public class AuthController {
     public ResponseEntity<Void> logout() {
         ResponseCookie cookie = ResponseCookie.from("jira-clone-session", "")
                 .httpOnly(true)
-                .secure(false)  // Set to true in production (HTTPS only)
+                .secure(cookieSecure)
+                .sameSite("Lax") // Keep consistent with login/register cookies
                 .path("/")
                 .maxAge(0) // This immediately deletes the cookie in the browser
                 .build();

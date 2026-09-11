@@ -62,7 +62,8 @@ public class MemberService {
         boolean isSelf = memberToDelete.getUser().getId().equals(userId);
 
         if (!MemberRole.ADMIN.equals(currentUser.getRole()) && !isSelf) {
-            throw new UnauthorizedAccessException("Only workspace administrators can remove members, or you can remove yourself to leave.");
+            throw new UnauthorizedAccessException(
+                    "Only workspace administrators can remove members, or you can remove yourself to leave.");
         }
 
         // 5. Prevent deleting an ADMIN
@@ -95,7 +96,7 @@ public class MemberService {
 
         // 4. Verify current user has permission
         if (!MemberRole.ADMIN.equals(currentUser.getRole())) {
-            throw new RuntimeException("Only workspace administrators can update members");
+            throw new UnauthorizedAccessException("Only workspace administrators can update members");
         }
 
         // 5. Update the member's role

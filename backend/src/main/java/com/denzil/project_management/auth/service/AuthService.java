@@ -3,6 +3,9 @@ package com.denzil.project_management.auth.service;
 import com.denzil.project_management.auth.dto.AuthResponse;
 import com.denzil.project_management.auth.dto.LoginRequest;
 import com.denzil.project_management.auth.dto.RegisterRequest;
+import com.denzil.project_management.shared.exception.BadRequestException;
+import com.denzil.project_management.shared.exception.ConflictException;
+import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.user.entity.User;
 import com.denzil.project_management.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +26,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         userRepository.findByEmail(request.email()).ifPresent(user -> {
-            throw new RuntimeException("Email already in use");
+            throw new ConflictException("Email already in use");
         });
 
         User user = new User();
@@ -38,12 +41,10 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
-        boolean matches = passwordEncoder.matches(request.password(), user.getPassword());
-
-        if (!matches) {
-            throw new RuntimeException("Invalid credentials");
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new BadRequestException("Invalid credentials");
         }
 
         return new AuthResponse(user.getId(), user.getName(), user.getEmail());
@@ -51,7 +52,7 @@ public class AuthService {
 
     public AuthResponse getCurrentUser(String userId) {
         User user = userRepository.findById(UUID.fromString(userId))
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return new AuthResponse(user.getId(), user.getName(), user.getEmail());
     }

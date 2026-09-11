@@ -17,7 +17,7 @@ public class Workspace extends BaseEntity {
 
     private String imageUrl;
 
-    @Column(nullable = false, unique = true, length = 6)
+    @Column(nullable = false, unique = true, length = 8)
     private String inviteCode;
 
     @ManyToOne(fetch = FetchType.LAZY)

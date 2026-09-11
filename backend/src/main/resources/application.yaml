@@ -10,8 +10,10 @@ spring:
     database: POSTGRESQL
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto:
+        validate # Safe for production: verifies schema matches entities, never modifies it.
+        # Use 'update' in dev (see application-dev.yaml). Use Flyway/Liquibase for prod migrations.
+    show-sql: false # Overridden to true in application-dev.yaml for local debugging.
     properties:
       hibernate:
         format_sql: true
@@ -29,6 +31,8 @@ app:
     secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRATION_MS:604800000}
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  cookie:
+    secure: ${COOKIE_SECURE:true} # Set to false locally (HTTP). Must be true in production (HTTPS).
 
 server:
   port: 8080

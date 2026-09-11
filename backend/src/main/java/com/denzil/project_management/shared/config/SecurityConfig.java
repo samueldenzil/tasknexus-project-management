@@ -29,8 +29,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.cors(Customizer.withDefaults());
 
-        // Disable CSRF (Cross-Site Request Forgery) because we will use stateless JWTs
-        // later, not session cookies.
+        // CSRF is disabled because our session cookies are set with SameSite=Lax, which
+        // instructs browsers to never attach the cookie to cross-site non-safe requests
+        // (POST, PATCH, DELETE, etc.). This is the mitigation against CSRF attacks.
         http.csrf(AbstractHttpConfigurer::disable);
 
         http.authorizeHttpRequests(auth -> auth
