@@ -34,7 +34,8 @@ public class TaskController {
     }
 
     @PostMapping("/bulk-update")
-    public ResponseEntity<Void> bulkUpdateTasks(@RequestBody BulkUpdateRequest request, @AuthenticationPrincipal String userId) {
+    public ResponseEntity<Void> bulkUpdateTasks(@Valid @RequestBody BulkUpdateRequest request,
+            @AuthenticationPrincipal String userId) {
         taskService.bulkUpdateTasks(request, userId);
         return ResponseEntity.ok().build();
     }
@@ -49,7 +50,8 @@ public class TaskController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) LocalDate dueDate,
             @AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok(taskService.getTasks(workspaceId, projectId, assigneeId, createdById, status, search, dueDate, userId));
+        return ResponseEntity.ok(
+                taskService.getTasks(workspaceId, projectId, assigneeId, createdById, status, search, dueDate, userId));
     }
 
     @GetMapping("/{taskId}")

@@ -64,6 +64,19 @@ public class WorkspaceService {
                 return sb.toString();
         }
 
+        /**
+         * Generates an invite code that is guaranteed to be unique within the
+         * workspaces table. Retries if a collision is detected, which is astronomically
+         * unlikely in practice (~34^8 ≈ 1.8 trillion possible codes).
+         */
+        private String generateUniqueInviteCode() {
+                String code;
+                do {
+                        code = generateInviteCode();
+                } while (workspaceRepository.existsByInviteCode(code));
+                return code;
+        }
+
         @Transactional
         public WorkspaceDto createWorkspace(CreateWorkspaceRequest request, String userId) {
                 // 1. Fetch the user who is creating the workspace
@@ -73,7 +86,7 @@ public class WorkspaceService {
                 // 2. Create the Workspace
                 Workspace workspace = new Workspace();
                 workspace.setName(request.name());
-                workspace.setInviteCode(generateInviteCode());
+                workspace.setInviteCode(generateUniqueInviteCode());
                 workspace.setOwner(owner);
 
                 Workspace savedWorkspace = workspaceRepository.save(workspace);
@@ -122,6 +135,7 @@ public class WorkspaceService {
                                 workspace.getInviteCode());
         }
 
+        @Transactional
         public WorkspaceDto updateWorkspace(UUID workspaceId, UpdateWorkspaceRequest request, String userId) {
                 Member member = memberRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -144,6 +158,7 @@ public class WorkspaceService {
                                 savedWorkspace.getInviteCode());
         }
 
+        @Transactional
         public void deleteWorkspace(UUID workspaceId, String userId) {
                 Member member = memberRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -156,6 +171,7 @@ public class WorkspaceService {
                 workspaceRepository.deleteById(workspaceId);
         }
 
+        @Transactional
         public WorkspaceDto resetInviteCode(UUID workspaceId, String userId) {
                 Member member = memberRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -167,7 +183,9 @@ public class WorkspaceService {
 
                 // Workspace is already loaded via the member — no second query needed
                 Workspace workspace = member.getWorkspace();
-                workspace.setInviteCode(generateInviteCode());
+                // Use uniqueness-checked code generation to avoid
+                // DataIntegrityViolationException
+                workspace.setInviteCode(generateUniqueInviteCode());
 
                 Workspace savedWorkspace = workspaceRepository.save(workspace);
 

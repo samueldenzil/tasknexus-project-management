@@ -12,4 +12,7 @@ public interface WorkspaceRepository extends JpaRepository<Workspace, UUID> {
 
     @Query("SELECT m.workspace FROM Member m WHERE m.user.id = :userId")
     List<Workspace> findWorkspacesByUserId(@Param("userId") UUID userId);
+
+    // Used by WorkspaceService to detect invite-code collisions before inserting.
+    boolean existsByInviteCode(String inviteCode);
 }

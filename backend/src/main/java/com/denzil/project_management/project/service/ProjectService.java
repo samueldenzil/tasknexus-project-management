@@ -11,6 +11,7 @@ import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.task.repository.TaskRepository;
 import com.denzil.project_management.workspace.entity.Workspace;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -82,6 +83,7 @@ public class ProjectService {
         return new ProjectDto(project.getId(), project.getName(), project.getImageUrl(), workspaceId);
     }
 
+    @Transactional
     public ProjectDto updateProject(UUID projectId, UpdateProjectRequest request, String userId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -102,6 +104,7 @@ public class ProjectService {
                 workspaceId);
     }
 
+    @Transactional
     public void deleteProject(UUID projectId, String userId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
