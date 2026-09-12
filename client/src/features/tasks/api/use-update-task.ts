@@ -11,7 +11,7 @@ type RequestType = {
     workspaceId?: string
     projectId?: string
     assigneeId?: string
-    dueDate?: Date
+    dueDate?: Date | string
     description?: string
   }
   param: {

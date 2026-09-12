@@ -3,6 +3,7 @@ package com.denzil.project_management.workspace.service;
 import com.denzil.project_management.member.entity.Member;
 import com.denzil.project_management.member.entity.MemberRole;
 import com.denzil.project_management.member.repository.MemberRepository;
+import com.denzil.project_management.project.repository.ProjectRepository;
 import com.denzil.project_management.shared.dto.AnalyticsDto;
 import com.denzil.project_management.shared.dto.TaskAnalyticsProjection;
 import com.denzil.project_management.shared.exception.BadRequestException;
@@ -14,6 +15,7 @@ import com.denzil.project_management.user.repository.UserRepository;
 import com.denzil.project_management.workspace.dto.CreateWorkspaceRequest;
 import com.denzil.project_management.workspace.dto.UpdateWorkspaceRequest;
 import com.denzil.project_management.workspace.dto.WorkspaceDto;
+import com.denzil.project_management.workspace.dto.WorkspaceInfoDto;
 import com.denzil.project_management.workspace.entity.Workspace;
 import com.denzil.project_management.workspace.repository.WorkspaceRepository;
 import org.springframework.stereotype.Service;
@@ -41,13 +43,16 @@ public class WorkspaceService {
         private final MemberRepository memberRepository;
         private final UserRepository userRepository;
         private final TaskRepository taskRepository;
+        private final ProjectRepository projectRepository;
 
         public WorkspaceService(WorkspaceRepository workspaceRepository, MemberRepository memberRepository,
-                        UserRepository userRepository, TaskRepository taskRepository) {
+                        UserRepository userRepository, TaskRepository taskRepository,
+                        ProjectRepository projectRepository) {
                 this.workspaceRepository = workspaceRepository;
                 this.memberRepository = memberRepository;
                 this.userRepository = userRepository;
                 this.taskRepository = taskRepository;
+                this.projectRepository = projectRepository;
         }
 
         /**
@@ -135,6 +140,16 @@ public class WorkspaceService {
                                 workspace.getInviteCode());
         }
 
+        public WorkspaceInfoDto getWorkspaceInfo(UUID workspaceId) {
+                Workspace workspace = workspaceRepository.findById(workspaceId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
+
+                return new WorkspaceInfoDto(
+                                workspace.getId(),
+                                workspace.getName(),
+                                workspace.getImageUrl());
+        }
+
         @Transactional
         public WorkspaceDto updateWorkspace(UUID workspaceId, UpdateWorkspaceRequest request, String userId) {
                 Member member = memberRepository.findByUserIdAndWorkspaceId(UUID.fromString(userId), workspaceId)
@@ -168,6 +183,9 @@ public class WorkspaceService {
                         throw new UnauthorizedAccessException("Only administrators can delete a workspace");
                 }
 
+                taskRepository.deleteAllByWorkspaceId(workspaceId);
+                projectRepository.deleteAllByWorkspaceId(workspaceId);
+                memberRepository.deleteAllByWorkspaceId(workspaceId);
                 workspaceRepository.deleteById(workspaceId);
         }
 

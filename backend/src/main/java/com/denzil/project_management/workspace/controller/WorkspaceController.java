@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.denzil.project_management.workspace.dto.CreateWorkspaceRequest;
 import com.denzil.project_management.workspace.dto.UpdateWorkspaceRequest;
 import com.denzil.project_management.workspace.dto.WorkspaceDto;
+import com.denzil.project_management.workspace.dto.WorkspaceInfoDto;
 import com.denzil.project_management.workspace.service.WorkspaceService;
 
 import jakarta.validation.Valid;
@@ -29,7 +30,7 @@ public class WorkspaceController {
 
     @PostMapping
     public ResponseEntity<WorkspaceDto> createWorkspace(@Valid @RequestBody CreateWorkspaceRequest request,
-                                                        @AuthenticationPrincipal String userId) {
+            @AuthenticationPrincipal String userId) {
         WorkspaceDto workspaceDto = workspaceService.createWorkspace(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(workspaceDto);
     }
@@ -42,9 +43,15 @@ public class WorkspaceController {
 
     @GetMapping("/{workspaceId}")
     public ResponseEntity<WorkspaceDto> getWorkspace(@PathVariable UUID workspaceId,
-                                                     @AuthenticationPrincipal String userId) {
+            @AuthenticationPrincipal String userId) {
         WorkspaceDto workspace = workspaceService.getWorkspace(workspaceId, userId);
         return ResponseEntity.ok(workspace);
+    }
+
+    @GetMapping("/{workspaceId}/info")
+    public ResponseEntity<WorkspaceInfoDto> getWorkspaceInfo(@PathVariable UUID workspaceId) {
+        WorkspaceInfoDto workspaceInfo = workspaceService.getWorkspaceInfo(workspaceId);
+        return ResponseEntity.ok(workspaceInfo);
     }
 
     @PatchMapping("/{workspaceId}")
@@ -65,7 +72,8 @@ public class WorkspaceController {
     }
 
     @PostMapping("/{workspaceId}/reset-invite-code")
-    public ResponseEntity<WorkspaceDto> resetInviteCode(@PathVariable UUID workspaceId, @AuthenticationPrincipal String userId) {
+    public ResponseEntity<WorkspaceDto> resetInviteCode(@PathVariable UUID workspaceId,
+            @AuthenticationPrincipal String userId) {
         WorkspaceDto workspace = workspaceService.resetInviteCode(workspaceId, userId);
         return ResponseEntity.ok(workspace);
     }
@@ -80,7 +88,8 @@ public class WorkspaceController {
     }
 
     @GetMapping("/{workspaceId}/analytics")
-    public ResponseEntity<AnalyticsDto> getWorkspaceAnalytics(@PathVariable UUID workspaceId, @AuthenticationPrincipal String userId) {
+    public ResponseEntity<AnalyticsDto> getWorkspaceAnalytics(@PathVariable UUID workspaceId,
+            @AuthenticationPrincipal String userId) {
         AnalyticsDto analyticsDto = workspaceService.getWorkspaceAnalytics(workspaceId, userId);
         return ResponseEntity.ok(analyticsDto);
     }

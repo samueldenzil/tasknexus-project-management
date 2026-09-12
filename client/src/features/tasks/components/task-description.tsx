@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import { PencilIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 
@@ -23,7 +24,7 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
         param: { taskId: task.id },
         json: {
           assigneeId: task.assignee?.id,
-          dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+          dueDate: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : undefined,
           name: task.name,
           projectId: task.project.id,
           status: task.status,

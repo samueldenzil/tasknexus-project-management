@@ -7,6 +7,7 @@ import com.denzil.project_management.member.repository.MemberRepository;
 import com.denzil.project_management.shared.exception.BadRequestException;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.shared.exception.UnauthorizedAccessException;
+import com.denzil.project_management.task.repository.TaskRepository;
 import com.denzil.project_management.user.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +19,11 @@ import java.util.UUID;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final TaskRepository taskRepository;
 
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(MemberRepository memberRepository, TaskRepository taskRepository) {
         this.memberRepository = memberRepository;
+        this.taskRepository = taskRepository;
     }
 
     public List<MemberDto> getMembers(UUID workspaceId, String currentUserId) {
@@ -66,15 +69,34 @@ public class MemberService {
                     "Only workspace administrators can remove members, or you can remove yourself to leave.");
         }
 
-        // 5. Prevent deleting an ADMIN
+        // 5. Prevent deleting the only administrator
         if (MemberRole.ADMIN.equals(memberToDelete.getRole())) {
-            throw new BadRequestException("Cannot delete a workspace administrator");
+            long adminCount = memberRepository.countByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN);
+            if (adminCount <= 1) {
+                throw new BadRequestException("Cannot delete the only administrator of the workspace");
+            }
         }
 
         // 6. Prevent deleting the last member
         if (memberRepository.countByWorkspaceId(workspaceId) <= 1) {
             throw new BadRequestException("Cannot delete the last member of the workspace");
         }
+
+        // Reassign tasks created by this member to an existing admin
+        Member fallbackAdmin = memberRepository.findAllByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN)
+                .stream()
+                .filter(m -> !m.getId().equals(memberToDelete.getId()))
+                .findFirst()
+                .orElse(currentUser.getRole() == MemberRole.ADMIN && !currentUser.getId().equals(memberToDelete.getId())
+                        ? currentUser
+                        : null);
+
+        if (fallbackAdmin != null) {
+            taskRepository.reassignCreatedBy(memberToDelete, fallbackAdmin);
+        }
+
+        // Unassign any tasks assigned to this member
+        taskRepository.unassignMember(memberToDelete);
 
         // 7. Delete member
         memberRepository.delete(memberToDelete);
@@ -99,10 +121,18 @@ public class MemberService {
             throw new UnauthorizedAccessException("Only workspace administrators can update members");
         }
 
-        // 5. Update the member's role
+        // 5. Prevent demoting the only administrator
+        if (MemberRole.ADMIN.equals(memberToUpdate.getRole()) && !MemberRole.ADMIN.equals(newRole)) {
+            long adminCount = memberRepository.countByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN);
+            if (adminCount <= 1) {
+                throw new BadRequestException("Cannot demote the only administrator of the workspace");
+            }
+        }
+
+        // 6. Update the member's role
         memberToUpdate.setRole(newRole);
 
-        // 6. Save the updated member
+        // 7. Save the updated member
         Member updatedMember = memberRepository.save(memberToUpdate);
 
         return new MemberDto(

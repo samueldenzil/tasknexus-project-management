@@ -10,7 +10,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "members")
+@Table(name = "members", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_member_user_workspace", columnNames = { "user_id", "workspace_id" })
+})
 public class Member extends BaseEntity {
 
     // A Member links One User to One Workspace

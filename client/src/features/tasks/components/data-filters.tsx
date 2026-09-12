@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import { FolderIcon, ListCheckIcon, UserIcon } from 'lucide-react'
 
 import { DatePicker } from '@/components/date-picker'
@@ -115,7 +116,7 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
 
       <DatePicker
         value={dueDate ? new Date(dueDate) : undefined}
-        onChange={(date) => setFilters({ dueDate: date ? date.toISOString() : null })}
+        onChange={(date) => setFilters({ dueDate: date ? format(date, 'yyyy-MM-dd') : null })}
         placeholder="Due date"
         className="h-8 w-full lg:w-auto"
       />

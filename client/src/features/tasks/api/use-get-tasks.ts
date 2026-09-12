@@ -23,7 +23,7 @@ export const useGetTasks = ({
   dueDate,
 }: UseGetTasksProps) => {
   const query = useQuery<Task[]>({
-    queryKey: ['tasks', workspaceId, projectId, status, search, assigneeId, dueDate],
+    queryKey: ['tasks', workspaceId, projectId, status, search, assigneeId, createdById, dueDate],
     queryFn: async () => {
       const params = new URLSearchParams({
         workspaceId,

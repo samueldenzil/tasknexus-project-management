@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -54,12 +55,15 @@ export const CreateTaskForm = ({
     },
   })
 
-  console.log(form.getValues())
-
   const onSubmit = (values: z.infer<typeof createTaskSchema>) => {
-    console.log('values', values)
     mutate(
-      { json: { ...values, workspaceId } },
+      {
+        json: {
+          ...values,
+          workspaceId,
+          dueDate: values.dueDate ? format(values.dueDate, 'yyyy-MM-dd') : values.dueDate,
+        },
+      },
       {
         onSuccess: () => {
           form.reset()

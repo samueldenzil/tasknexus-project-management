@@ -1,6 +1,7 @@
 package com.denzil.project_management.member.repository;
 
 import com.denzil.project_management.member.entity.Member;
+import com.denzil.project_management.member.entity.MemberRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -15,4 +16,10 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
     List<Member> findAllByWorkspaceId(UUID workspaceId);
 
     long countByWorkspaceId(UUID workspaceId);
+
+    long countByWorkspaceIdAndRole(UUID workspaceId, MemberRole role);
+
+    List<Member> findAllByWorkspaceIdAndRole(UUID workspaceId, MemberRole role);
+
+    void deleteAllByWorkspaceId(UUID workspaceId);
 }

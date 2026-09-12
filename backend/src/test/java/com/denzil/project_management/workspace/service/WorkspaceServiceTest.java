@@ -1,14 +1,16 @@
-﻿package com.denzil.project_management.workspace.service;
+package com.denzil.project_management.workspace.service;
 
 import com.denzil.project_management.member.entity.Member;
 import com.denzil.project_management.member.entity.MemberRole;
 import com.denzil.project_management.member.repository.MemberRepository;
+import com.denzil.project_management.project.repository.ProjectRepository;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.shared.exception.UnauthorizedAccessException;
 import com.denzil.project_management.task.repository.TaskRepository;
 import com.denzil.project_management.user.entity.User;
 import com.denzil.project_management.user.repository.UserRepository;
 import com.denzil.project_management.workspace.dto.WorkspaceDto;
+import com.denzil.project_management.workspace.dto.WorkspaceInfoDto;
 import com.denzil.project_management.workspace.entity.Workspace;
 import com.denzil.project_management.workspace.repository.WorkspaceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,10 +32,16 @@ import static org.mockito.Mockito.*;
 @DisplayName("WorkspaceService")
 class WorkspaceServiceTest {
 
-    @Mock private WorkspaceRepository workspaceRepository;
-    @Mock private MemberRepository memberRepository;
-    @Mock private UserRepository userRepository;
-    @Mock private TaskRepository taskRepository;
+    @Mock
+    private WorkspaceRepository workspaceRepository;
+    @Mock
+    private MemberRepository memberRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private TaskRepository taskRepository;
+    @Mock
+    private ProjectRepository projectRepository;
 
     @InjectMocks
     private WorkspaceService workspaceService;
@@ -47,8 +55,8 @@ class WorkspaceServiceTest {
 
     @BeforeEach
     void setUp() {
-        workspaceId  = UUID.randomUUID();
-        adminUserId  = UUID.randomUUID();
+        workspaceId = UUID.randomUUID();
+        adminUserId = UUID.randomUUID();
         memberUserId = UUID.randomUUID();
 
         workspace = new Workspace();
@@ -102,6 +110,29 @@ class WorkspaceServiceTest {
                 .hasMessage("Workspace not found or access denied");
     }
 
+    // -- getWorkspaceInfo --------------------------------------------------
+
+    @Test
+    @DisplayName("getWorkspaceInfo: returns workspace info when workspace exists")
+    void getWorkspaceInfo_workspaceExists_returnsInfoDto() {
+        when(workspaceRepository.findById(workspaceId)).thenReturn(Optional.of(workspace));
+
+        WorkspaceInfoDto info = workspaceService.getWorkspaceInfo(workspaceId);
+
+        assertThat(info.id()).isEqualTo(workspaceId);
+        assertThat(info.name()).isEqualTo("My Workspace");
+    }
+
+    @Test
+    @DisplayName("getWorkspaceInfo: throws ResourceNotFoundException when workspace not found")
+    void getWorkspaceInfo_notFound_throwsException() {
+        when(workspaceRepository.findById(workspaceId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> workspaceService.getWorkspaceInfo(workspaceId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Workspace not found");
+    }
+
     // -- deleteWorkspace ---------------------------------------------------
 
     @Test
@@ -112,6 +143,9 @@ class WorkspaceServiceTest {
 
         workspaceService.deleteWorkspace(workspaceId, adminUserId.toString());
 
+        verify(taskRepository).deleteAllByWorkspaceId(workspaceId);
+        verify(projectRepository).deleteAllByWorkspaceId(workspaceId);
+        verify(memberRepository).deleteAllByWorkspaceId(workspaceId);
         verify(workspaceRepository).deleteById(workspaceId);
     }
 

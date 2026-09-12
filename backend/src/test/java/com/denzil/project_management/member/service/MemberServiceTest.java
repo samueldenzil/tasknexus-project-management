@@ -7,6 +7,7 @@ import com.denzil.project_management.member.repository.MemberRepository;
 import com.denzil.project_management.shared.exception.BadRequestException;
 import com.denzil.project_management.shared.exception.ResourceNotFoundException;
 import com.denzil.project_management.shared.exception.UnauthorizedAccessException;
+import com.denzil.project_management.task.repository.TaskRepository;
 import com.denzil.project_management.user.entity.User;
 import com.denzil.project_management.workspace.entity.Workspace;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,6 +32,9 @@ class MemberServiceTest {
 
         @Mock
         private MemberRepository memberRepository;
+
+        @Mock
+        private TaskRepository taskRepository;
 
         @InjectMocks
         private MemberService memberService;
@@ -129,20 +134,83 @@ class MemberServiceTest {
                                 .hasMessage("Member not found");
         }
 
-        // -- deleteMember ------------------------------------------------------
-
         @Test
-        @DisplayName("deleteMember: cannot delete a workspace admin")
-        void deleteMember_targetIsAdmin_throwsBadRequestException() {
+        @DisplayName("updateMemberRole: cannot demote the only administrator of the workspace")
+        void updateMemberRole_demoteLastAdmin_throwsBadRequestException() {
                 when(memberRepository.findById(adminMember.getId())).thenReturn(Optional.of(adminMember));
                 when(memberRepository.findByUserIdAndWorkspaceId(adminUserId, workspaceId))
                                 .thenReturn(Optional.of(adminMember));
-                // NOTE: countByWorkspaceId is NOT stubbed here — the ADMIN check at step 5
-                // throws BadRequestException before the count check at step 6 is ever reached.
+                when(memberRepository.countByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN)).thenReturn(1L);
+
+                assertThatThrownBy(() -> memberService.updateMemberRole(adminMember.getId(), MemberRole.MEMBER,
+                                adminUserId.toString()))
+                                .isInstanceOf(BadRequestException.class)
+                                .hasMessage("Cannot demote the only administrator of the workspace");
+
+                verify(memberRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("updateMemberRole: admin can demote an admin when another administrator exists")
+        void updateMemberRole_demoteAdmin_multipleAdmins_success() {
+                when(memberRepository.findById(adminMember.getId())).thenReturn(Optional.of(adminMember));
+                when(memberRepository.findByUserIdAndWorkspaceId(adminUserId, workspaceId))
+                                .thenReturn(Optional.of(adminMember));
+                when(memberRepository.countByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN)).thenReturn(2L);
+
+                Member demotedMember = new Member();
+                demotedMember.setId(adminMember.getId());
+                demotedMember.setUser(adminUser);
+                demotedMember.setWorkspace(workspace);
+                demotedMember.setRole(MemberRole.MEMBER);
+                when(memberRepository.save(adminMember)).thenReturn(demotedMember);
+
+                MemberDto result = memberService.updateMemberRole(adminMember.getId(), MemberRole.MEMBER,
+                                adminUserId.toString());
+
+                assertThat(result.role()).isEqualTo(MemberRole.MEMBER);
+                verify(memberRepository).save(adminMember);
+        }
+
+        // -- deleteMember ------------------------------------------------------
+
+        @Test
+        @DisplayName("deleteMember: cannot delete the only administrator of the workspace")
+        void deleteMember_targetIsOnlyAdmin_throwsBadRequestException() {
+                when(memberRepository.findById(adminMember.getId())).thenReturn(Optional.of(adminMember));
+                when(memberRepository.findByUserIdAndWorkspaceId(adminUserId, workspaceId))
+                                .thenReturn(Optional.of(adminMember));
+                when(memberRepository.countByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN)).thenReturn(1L);
 
                 assertThatThrownBy(() -> memberService.deleteMember(adminMember.getId(), adminUserId.toString()))
                                 .isInstanceOf(BadRequestException.class)
-                                .hasMessage("Cannot delete a workspace administrator");
+                                .hasMessage("Cannot delete the only administrator of the workspace");
+        }
+
+        @Test
+        @DisplayName("deleteMember: admin can be deleted if another administrator exists")
+        void deleteMember_targetIsAdmin_multipleAdmins_deletesAdmin() {
+                User secondAdminUser = new User();
+                secondAdminUser.setId(UUID.randomUUID());
+                Member secondAdmin = new Member();
+                secondAdmin.setId(UUID.randomUUID());
+                secondAdmin.setUser(secondAdminUser);
+                secondAdmin.setWorkspace(workspace);
+                secondAdmin.setRole(MemberRole.ADMIN);
+
+                when(memberRepository.findById(adminMember.getId())).thenReturn(Optional.of(adminMember));
+                when(memberRepository.findByUserIdAndWorkspaceId(secondAdminUser.getId(), workspaceId))
+                                .thenReturn(Optional.of(secondAdmin));
+                when(memberRepository.countByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN)).thenReturn(2L);
+                when(memberRepository.countByWorkspaceId(workspaceId)).thenReturn(2L);
+                when(memberRepository.findAllByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN))
+                                .thenReturn(List.of(adminMember, secondAdmin));
+
+                memberService.deleteMember(adminMember.getId(), secondAdminUser.getId().toString());
+
+                verify(taskRepository).reassignCreatedBy(adminMember, secondAdmin);
+                verify(taskRepository).unassignMember(adminMember);
+                verify(memberRepository).delete(adminMember);
         }
 
         @Test
@@ -156,5 +224,22 @@ class MemberServiceTest {
                 assertThatThrownBy(() -> memberService.deleteMember(regularMember.getId(), adminUserId.toString()))
                                 .isInstanceOf(BadRequestException.class)
                                 .hasMessage("Cannot delete the last member of the workspace");
+        }
+
+        @Test
+        @DisplayName("deleteMember: admin can delete a regular member and task references are cleaned up")
+        void deleteMember_adminCaller_deletesMemberAndCleansUpTasks() {
+                when(memberRepository.findById(regularMember.getId())).thenReturn(Optional.of(regularMember));
+                when(memberRepository.findByUserIdAndWorkspaceId(adminUserId, workspaceId))
+                                .thenReturn(Optional.of(adminMember));
+                when(memberRepository.countByWorkspaceId(workspaceId)).thenReturn(2L);
+                when(memberRepository.findAllByWorkspaceIdAndRole(workspaceId, MemberRole.ADMIN))
+                                .thenReturn(List.of(adminMember));
+
+                memberService.deleteMember(regularMember.getId(), adminUserId.toString());
+
+                verify(taskRepository).reassignCreatedBy(regularMember, adminMember);
+                verify(taskRepository).unassignMember(regularMember);
+                verify(memberRepository).delete(regularMember);
         }
 }

@@ -15,7 +15,7 @@ public record TaskDto(
         UUID workspaceId,
         ProjectSummaryDto project,
         AssigneeSummaryDto assignee,
-        CreatedBySummaryDto createdById) {
+        CreatedBySummaryDto createdBy) {
     public record ProjectSummaryDto(UUID id, String name, String imageUrl) {
     }
 

@@ -19,6 +19,10 @@ const WorkspaceIdJoinPage = async ({ params }: WorkspaceIdJoinPageProps) => {
 
   const initialValues = await getWorkspaceInfo({ workspaceId })
 
+  if (!initialValues) {
+    redirect('/')
+  }
+
   return (
     <div className="w-full lg:max-w-xl">
       <JoinWorkspaceForm initialValues={initialValues} />

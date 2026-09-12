@@ -35,7 +35,10 @@ export const getWorkspaceInfo = async ({ workspaceId }: GetWorkspaceInfoProps) =
       return null
     }
 
-    const data = await api.get<Workspace>(`/api/v1/workspaces/${workspaceId}`, { headers })
+    const data = await api.get<{ id: string; name: string; imageUrl?: string }>(
+      `/api/v1/workspaces/${workspaceId}/info`,
+      { headers }
+    )
 
     return {
       name: data.name,

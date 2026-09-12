@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftIcon, CopyIcon, ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -113,7 +113,15 @@ export const EditWorkspaceForm = ({ initialValue, onCancel }: EditWorkspaceFormP
     }
   }
 
-  const fullInviteLink = `${window.location.origin}/workspaces/${initialValue.id}/join/${initialValue.inviteCode}`
+  const [fullInviteLink, setFullInviteLink] = useState('')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setFullInviteLink(
+        `${window.location.origin}/workspaces/${initialValue.id}/join/${initialValue.inviteCode}`
+      )
+    }
+  }, [initialValue.id, initialValue.inviteCode])
 
   const handleCopyInviteLink = () => {
     navigator.clipboard

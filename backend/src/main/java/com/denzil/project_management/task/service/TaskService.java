@@ -193,7 +193,9 @@ public class TaskService {
                 task.setStatus(request.status());
                 task.setProject(project);
                 task.setAssignee(assignee);
-                task.setDescription(request.description());
+                if (request.description() != null) {
+                        task.setDescription(request.description());
+                }
                 task.setDueDate(request.dueDate());
 
                 Task updatedTask = taskRepository.save(task);
