@@ -1,0 +1,13 @@
+# Dev profile overrides production-safe defaults in application.yaml.
+# Activate with: --spring.profiles.active=dev  (or SPRING_PROFILES_ACTIVE=dev)
+spring:
+  jpa:
+    hibernate:
+      ddl-auto:
+        update # Auto-creates/updates tables from entity definitions during local development.
+        # NEVER use in production schema changes must go through Flyway/Liquibase migrations.
+    show-sql: true # Logs all SQL to stdout for local debugging.
+
+app:
+  cookie:
+    secure: ${COOKIE_SECURE:false} # HTTP is fine for localhost; production must use HTTPS (secure: true).
