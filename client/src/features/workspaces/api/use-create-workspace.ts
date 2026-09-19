@@ -6,6 +6,8 @@ import { api } from '@/lib/api'
 import { z } from 'zod'
 import { createWorkspaceSchema } from '../schemas'
 import { Workspace } from '../types'
+import { workspacesKeys } from '@/lib/query-keys'
+
 
 type RequestType = z.infer<typeof createWorkspaceSchema>
 type ResponseType = Workspace
@@ -23,7 +25,7 @@ export const useCreateWorkspace = () => {
       toast.success('Workspace created')
 
       router.refresh()
-      queryClient.invalidateQueries({ queryKey: ['workspaces'] })
+      queryClient.invalidateQueries({ queryKey: workspacesKeys.lists() })
     },
     onError: () => {
       toast.error('Failed to create workspace')

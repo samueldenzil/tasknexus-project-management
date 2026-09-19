@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 
 import { Project } from '@/features/projects/types'
 import { api } from '@/lib/api'
+import { projectsKeys } from '@/lib/query-keys'
+
 
 interface UseGetProjectsProps {
   projectId: string
@@ -9,7 +11,7 @@ interface UseGetProjectsProps {
 
 export const useGetProject = ({ projectId }: UseGetProjectsProps) => {
   const query = useQuery({
-    queryKey: ['project', projectId],
+    queryKey: projectsKeys.detail(projectId),
     queryFn: async ({}) => {
       return await api.get<Project>(`/api/v1/projects/${projectId}`)
     },

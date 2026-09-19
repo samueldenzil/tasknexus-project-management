@@ -3,6 +3,8 @@ import { toast } from 'sonner'
 
 import { Workspace } from '@/features/workspaces/types'
 import { api } from '@/lib/api'
+import { workspacesKeys } from '@/lib/query-keys'
+
 
 type RequestType = { param: { workspaceId: string } }
 
@@ -18,8 +20,8 @@ export const useResetInviteCode = () => {
     onSuccess: (data) => {
       toast.success('Invite code reseted')
 
-      queryClient.invalidateQueries({ queryKey: ['workspaces'] })
-      queryClient.invalidateQueries({ queryKey: ['workspace', data.id] })
+      queryClient.invalidateQueries({ queryKey: workspacesKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: workspacesKeys.detail(data.id) })
     },
     onError: () => {
       toast.error('Failed to reset invite code')

@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 
 import { api } from '@/lib/api'
 import { Workspace } from '../types'
+import { workspacesKeys } from '@/lib/query-keys'
+
 
 interface UseGetWorkspaceProps {
   workspaceId: string
@@ -9,7 +11,7 @@ interface UseGetWorkspaceProps {
 
 export const useGetWorkspace = ({ workspaceId }: UseGetWorkspaceProps) => {
   const query = useQuery({
-    queryKey: ['workspace', workspaceId],
+    queryKey: workspacesKeys.detail(workspaceId),
     queryFn: async () => {
       const data = await api.get<Workspace>(`/api/v1/workspaces/${workspaceId}`)
       return data

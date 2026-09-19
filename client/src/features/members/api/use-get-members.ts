@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 
 import { api } from '@/lib/api'
 import { Member } from '../types'
+import { membersKeys } from '@/lib/query-keys'
+
 
 interface UseGetMembersProps {
   workspaceId: string
@@ -9,7 +11,7 @@ interface UseGetMembersProps {
 
 export const useGetMembers = ({ workspaceId }: UseGetMembersProps) => {
   const query = useQuery<Member[]>({
-    queryKey: ['members', workspaceId],
+    queryKey: membersKeys.list(workspaceId),
     queryFn: async () => {
       return await api.get<Member[]>(`/api/v1/members?workspaceId=${workspaceId}`)
     },

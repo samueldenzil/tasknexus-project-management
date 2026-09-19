@@ -6,6 +6,8 @@ import { z } from 'zod'
 import { registerSchema } from '@/features/auth/schemas'
 import { AuthResponse } from '@/features/auth/types'
 import { api } from '@/lib/api'
+import { authKeys } from '@/lib/query-keys'
+
 
 type RequestType = z.infer<typeof registerSchema>
 type ResponseType = AuthResponse
@@ -22,7 +24,7 @@ export const useRegister = () => {
     onSuccess: () => {
       toast.success('Registered')
       router.refresh()
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      queryClient.invalidateQueries({ queryKey: authKeys.currentUser() })
     },
     onError: () => {
       toast.error('Failed to register')

@@ -3,6 +3,8 @@ import { toast } from 'sonner'
 
 import { Task, TaskStatus } from '@/features/tasks/types'
 import { api } from '@/lib/api'
+import { workspacesKeys, projectsKeys, tasksKeys } from '@/lib/query-keys'
+
 
 type RequestType = {
   json: {
@@ -30,10 +32,10 @@ export const useUpdateTask = () => {
     onSuccess: (data) => {
       toast.success('Task updated')
 
-      queryClient.invalidateQueries({ queryKey: ['project-analytics'] })
-      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] })
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['task', data.id] })
+      queryClient.invalidateQueries({ queryKey: projectsKeys.analytics() })
+      queryClient.invalidateQueries({ queryKey: workspacesKeys.analytics() })
+      queryClient.invalidateQueries({ queryKey: tasksKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: tasksKeys.detail(data.id) })
     },
     onError: () => {
       toast.error('Failed to update task')

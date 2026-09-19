@@ -3,6 +3,8 @@ import { toast } from 'sonner'
 
 import { Task, TaskStatus } from '@/features/tasks/types'
 import { api } from '@/lib/api'
+import { tasksKeys } from '@/lib/query-keys'
+
 
 type RequestType = {
   json: {
@@ -26,7 +28,7 @@ export const useCreateTask = () => {
     },
     onSuccess: () => {
       toast.success('Task created')
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: tasksKeys.lists() })
     },
     onError: () => {
       toast.error('Failed to create task')

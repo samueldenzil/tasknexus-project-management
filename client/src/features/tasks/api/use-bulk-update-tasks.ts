@@ -3,6 +3,8 @@ import { toast } from 'sonner'
 
 import { api } from '@/lib/api'
 import { TaskStatus } from '../types'
+import { workspacesKeys, projectsKeys, tasksKeys } from '@/lib/query-keys'
+
 
 type RequestType = {
   workspaceId: string
@@ -23,9 +25,9 @@ export const useBulkUpdateTasks = () => {
     onSuccess: () => {
       toast.success('Tasks updated')
 
-      queryClient.invalidateQueries({ queryKey: ['project-analytics'] })
-      queryClient.invalidateQueries({ queryKey: ['workspace-analytics'] })
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: projectsKeys.analytics() })
+      queryClient.invalidateQueries({ queryKey: workspacesKeys.analytics() })
+      queryClient.invalidateQueries({ queryKey: tasksKeys.lists() })
     },
     onError: () => {
       toast.error('Failed to update tasks')

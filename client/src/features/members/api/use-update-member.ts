@@ -3,6 +3,8 @@ import { toast } from 'sonner'
 
 import { api } from '@/lib/api'
 import { Member, MemberRole } from '../types'
+import { membersKeys } from '@/lib/query-keys'
+
 
 type RequestType = {
   json: {
@@ -24,7 +26,7 @@ export const useUpdateMember = () => {
     },
     onSuccess: () => {
       toast.success('Member updated')
-      queryClient.invalidateQueries({ queryKey: ['members'] })
+      queryClient.invalidateQueries({ queryKey: membersKeys.all })
     },
     onError: () => {
       toast.error('Failed to update member')

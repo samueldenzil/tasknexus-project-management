@@ -2,6 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { api } from '@/lib/api'
+import { membersKeys } from '@/lib/query-keys'
+
 
 type RequestType = { param: { memberId: string } }
 
@@ -14,7 +16,7 @@ export const useDeleteMember = () => {
     },
     onSuccess: () => {
       toast.success('Member deleted')
-      queryClient.invalidateQueries({ queryKey: ['members'] })
+      queryClient.invalidateQueries({ queryKey: membersKeys.all })
     },
     onError: () => {
       toast.error('Failed to delete member')

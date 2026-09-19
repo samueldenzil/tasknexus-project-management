@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 
 import { Task, TaskStatus } from '@/features/tasks/types'
 import { api } from '@/lib/api'
+import { tasksKeys } from '@/lib/query-keys'
+
 
 interface UseGetTasksProps {
   workspaceId: string
@@ -23,7 +25,7 @@ export const useGetTasks = ({
   dueDate,
 }: UseGetTasksProps) => {
   const query = useQuery<Task[]>({
-    queryKey: ['tasks', workspaceId, projectId, status, search, assigneeId, createdById, dueDate],
+    queryKey: tasksKeys.list({ workspaceId, projectId, status, search, assigneeId, createdById, dueDate }),
     queryFn: async () => {
       const params = new URLSearchParams({
         workspaceId,

@@ -3,6 +3,8 @@ import { toast } from 'sonner'
 
 import { Project } from '@/features/projects/types'
 import { api } from '@/lib/api'
+import { projectsKeys } from '@/lib/query-keys'
+
 
 type RequestType = {
   form: {
@@ -25,8 +27,8 @@ export const useUpdateProject = () => {
     },
     onSuccess: (data) => {
       toast.success('Project updated')
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      queryClient.invalidateQueries({ queryKey: ['project', data.id] })
+      queryClient.invalidateQueries({ queryKey: projectsKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: projectsKeys.detail(data.id) })
     },
     onError: () => {
       toast.error('Failed to update project')

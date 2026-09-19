@@ -6,6 +6,8 @@ import { z } from 'zod'
 import { loginSchema } from '@/features/auth/schemas'
 import { AuthResponse } from '@/features/auth/types'
 import { api } from '@/lib/api'
+import { authKeys } from '@/lib/query-keys'
+
 
 type RequestType = z.infer<typeof loginSchema>
 type ResponseType = AuthResponse
@@ -22,7 +24,7 @@ export const useLogin = () => {
     onSuccess: () => {
       toast.success('Logged in')
       router.refresh()
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      queryClient.invalidateQueries({ queryKey: authKeys.currentUser() })
     },
     onError: () => {
       toast.error('Failed to login')
