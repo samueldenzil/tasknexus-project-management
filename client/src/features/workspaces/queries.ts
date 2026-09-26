@@ -5,8 +5,8 @@ import { Workspace } from './types'
 
 const getAuthHeaders = async () => {
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('jira-clone-session')
-  return sessionCookie ? { Cookie: `jira-clone-session=${sessionCookie.value}` } : {}
+  const sessionCookie = cookieStore.get('tasknexus-session')
+  return sessionCookie ? { Cookie: `tasknexus-session=${sessionCookie.value}` } : {}
 }
 
 export const getWorkspaces = async () => {

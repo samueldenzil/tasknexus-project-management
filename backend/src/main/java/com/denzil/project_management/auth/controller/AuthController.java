@@ -36,7 +36,7 @@ public class AuthController {
         String token = jwtUtil.generateToken(authResponse.id());
 
         // Create the HTTP-Only cookie
-        ResponseCookie cookie = ResponseCookie.from("jira-clone-session", token)
+        ResponseCookie cookie = ResponseCookie.from("tasknexus-session", token)
                 .httpOnly(true)
                 .secure(cookieSecure)
                 .sameSite("Lax") // Prevents cookie from being sent on cross-site POST/PATCH/DELETE requests
@@ -59,7 +59,7 @@ public class AuthController {
         String token = jwtUtil.generateToken(authResponse.id());
 
         // 3. Create the HTTP-Only cookie
-        ResponseCookie cookie = ResponseCookie.from("jira-clone-session", token)
+        ResponseCookie cookie = ResponseCookie.from("tasknexus-session", token)
                 .httpOnly(true)
                 .secure(cookieSecure)
                 .sameSite("Lax") // Prevents cookie from being sent on cross-site POST/PATCH/DELETE requests
@@ -75,7 +75,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
-        ResponseCookie cookie = ResponseCookie.from("jira-clone-session", "")
+        ResponseCookie cookie = ResponseCookie.from("tasknexus-session", "")
                 .httpOnly(true)
                 .secure(cookieSecure)
                 .sameSite("Lax") // Keep consistent with login/register cookies

@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 1. Look for our specific cookie in the incoming request
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("jira-clone-session")) {
+                if (cookie.getName().equals("tasknexus-session")) {
                     token = cookie.getValue();
                     break;
                 }

@@ -1,6 +1,6 @@
-# Jira Clone
+# TaskNexus
 
-A full-stack, enterprise-grade project management application inspired by Atlassian Jira. Designed with a modern decoupled architecture, Jira Clone pairs a high-performance **Spring Boot** REST API backend with a responsive, server-rendered **Next.js 15** frontend.
+A full-stack, enterprise-grade project management application inspired by Atlassian Jira. Designed with a modern decoupled architecture, TaskNexus pairs a high-performance **Spring Boot** REST API backend with a responsive, server-rendered **Next.js 15** frontend.
 
 It provides teams with multi-tenant workspaces, role-based member management, project organization, multi-view task workflows (Kanban with drag-and-drop, interactive data tables, and calendar views), and month-over-month performance analytics.
 
@@ -36,7 +36,7 @@ It provides teams with multi-tenant workspaces, role-based member management, pr
 
 ## Project Overview
 
-Modern software development teams require clear visibility into their delivery pipelines. **Jira Clone** delivers an intuitive, fast, and secure project tracking experience designed for cross-functional teams:
+Modern software development teams require clear visibility into their delivery pipelines. **TaskNexus** delivers an intuitive, fast, and secure project tracking experience designed for cross-functional teams:
 
 - **Isolated Workspaces**: Teams organize work into distinct workspaces with independent memberships, projects, and permissions.
 - **Multiple Task Visualizations**: Team members can switch between Kanban boards, structured tables, and schedule calendars depending on their workflow preferences.
@@ -50,7 +50,7 @@ Modern software development teams require clear visibility into their delivery p
 ### 🔐 Authentication & Access Control
 
 - Secure user registration and authentication with BCrypt password encryption.
-- Stateless JSON Web Token (JWT) session stored in an `HttpOnly`, `SameSite=Lax` cookie (`jira-clone-session`), safeguarding against cross-site scripting (XSS) and mitigating CSRF attacks.
+- Stateless JSON Web Token (JWT) session stored in an `HttpOnly`, `SameSite=Lax` cookie (`tasknexus-session`), safeguarding against cross-site scripting (XSS) and mitigating CSRF attacks.
 - Current session resolution (`/api/v1/auth/me`) and clean server-side cookie invalidation on logout.
 
 ### 🏢 Workspace Management
@@ -135,7 +135,7 @@ flowchart TB
 
     subgraph API["Spring Boot REST API — Port 8080 · Java 21 · Spring Security"]
         direction TB
-        Filter["JwtAuthenticationFilter<br/>Extracts JWT from jira-clone-session cookie<br/>Sets authenticated principal (userId)"]
+        Filter["JwtAuthenticationFilter<br/>Extracts JWT from tasknexus-session cookie<br/>Sets authenticated principal (userId)"]
         Controllers["Controllers (/api/v1/*)<br/>Auth · Workspace · Member · Project · Task"]
         Service["Service Layer<br/>Business logic & access checks"]
         Repo["Spring Data JPA Repositories"]
@@ -146,7 +146,7 @@ flowchart TB
     DB[("PostgreSQL Database<br/>Port 5432")]
 
     Client -->|"Credentials: include<br/>JSON payloads"| Filter
-    Filter -.->|"Set-Cookie: jira-clone-session<br/>(HttpOnly, SameSite=Lax)"| Client
+    Filter -.->|"Set-Cookie: tasknexus-session<br/>(HttpOnly, SameSite=Lax)"| Client
     Repo --> DB
 ```
 
@@ -155,7 +155,7 @@ flowchart TB
 ## Repository Structure
 
 ```
-Jira-Clone-NextJs/
+TaskNexus-NextJs/
 ├── backend/                                   # Spring Boot application
 │   ├── .mvn/wrapper/                          # Maven wrapper binaries and configuration
 │   ├── src/
@@ -229,8 +229,8 @@ Before starting the application locally, ensure you have the following software 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/samueldenzil/Jira-Clone-NextJs.git
-cd Jira-Clone-NextJs
+git clone https://github.com/samueldenzil/TaskNexus-NextJs.git
+cd TaskNexus-NextJs
 ```
 
 ### 2. Set Up the Database
@@ -238,7 +238,7 @@ cd Jira-Clone-NextJs
 Create a new PostgreSQL database for the project:
 
 ```sql
-CREATE DATABASE jira_clone;
+CREATE DATABASE tasknexus_db;
 ```
 
 ---
@@ -253,7 +253,7 @@ Create a `.env` file in `backend/` or configure your shell environment:
 # Database Connection
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=jira_clone
+DB_NAME=tasknexus_db
 DB_USERNAME=postgres
 DB_PASSWORD=your_postgres_password
 
@@ -348,7 +348,7 @@ Open your browser and navigate to **`http://localhost:3000`**.
 
 ## API Reference
 
-All backend API routes are prefixed with `/api/v1`. Authentication is handled via the `jira-clone-session` cookie attached to every request (`credentials: include`).
+All backend API routes are prefixed with `/api/v1`. Authentication is handled via the `tasknexus-session` cookie attached to every request (`credentials: include`).
 
 ### 1. Authentication & Session
 
@@ -364,7 +364,7 @@ All backend API routes are prefixed with `/api/v1`. Authentication is handled vi
     "password": "SecurePassword123"
   }
   ```
-- **Response**: `200 OK` (Sets `jira-clone-session` cookie)
+- **Response**: `200 OK` (Sets `tasknexus-session` cookie)
   ```json
   {
     "id": "e7b0c95d-4f3b-47e1-b4f0-8c20165fbfa8",
@@ -384,13 +384,13 @@ All backend API routes are prefixed with `/api/v1`. Authentication is handled vi
     "password": "SecurePassword123"
   }
   ```
-- **Response**: `200 OK` (Sets `jira-clone-session` cookie)
+- **Response**: `200 OK` (Sets `tasknexus-session` cookie)
 
 #### Logout
 
 - **Endpoint**: `POST /api/v1/auth/logout`
 - **Access**: Authenticated
-- **Response**: `200 OK` (Clears `jira-clone-session` cookie)
+- **Response**: `200 OK` (Clears `tasknexus-session` cookie)
 
 #### Current User
 
@@ -662,7 +662,7 @@ npm run start
   sudo systemctl status postgresql
 
   # If using Docker:
-  docker run --name postgres-jira -e POSTGRES_DB=jira_clone -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:16
+  docker run --name postgres-jira -e POSTGRES_DB=tasknexus_db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:16
   ```
 
 ### 2. Cookie Not Set in Browser (Cross-Origin Issues)
