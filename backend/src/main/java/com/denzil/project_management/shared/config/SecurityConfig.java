@@ -27,7 +27,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
-        http.cors(Customizer.withDefaults());
+        http.cors(AbstractHttpConfigurer::disable);
 
         // CSRF is disabled because our session cookies are set with SameSite=Lax, which
         // instructs browsers to never attach the cookie to cross-site non-safe requests
