@@ -8,17 +8,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
-    @Value("${app.frontend-url}")
-    private String frontendUrl;
+    // @Value("${app.frontend-url}")
+    // private String frontendUrl;
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**") // Apply to all API routes
-                .allowedOrigins(frontendUrl)
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
-    }
+    // @Override
+    // public void addCorsMappings(CorsRegistry registry) {
+    // registry.addMapping("/api/**") // Apply to all API routes
+    // .allowedOrigins(frontendUrl)
+    // .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+    // .allowedHeaders("*")
+    // .allowCredentials(true);
+    // }
 
     @Override
     public void addFormatters(org.springframework.format.FormatterRegistry registry) {
