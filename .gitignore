@@ -9,6 +9,7 @@ Desktop.ini
 # IDEs & Editors
 # ==========================================
 # IntelliJ IDEA
+.idea
 .idea/shelf/
 .idea/workspace.xml
 .idea/httpRequests/

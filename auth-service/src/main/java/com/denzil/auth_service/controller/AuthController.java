@@ -1,10 +1,10 @@
-package com.denzil.project_management.auth.controller;
+package com.denzil.auth_service.controller;
 
-import com.denzil.project_management.auth.dto.AuthResponse;
-import com.denzil.project_management.auth.dto.LoginRequest;
-import com.denzil.project_management.auth.dto.RegisterRequest;
-import com.denzil.project_management.auth.service.AuthService;
-import com.denzil.project_management.shared.security.JwtUtil;
+import com.denzil.auth_service.dto.AuthResponse;
+import com.denzil.auth_service.dto.LoginRequest;
+import com.denzil.auth_service.dto.RegisterRequest;
+import com.denzil.auth_service.security.JwtUtil;
+import com.denzil.auth_service.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Deprecated
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
